@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings &amp; Account — The Global Food Encyclopedia</title>
+<meta name="description" content="Sign in to sync your shelf — favorites, want-to-try, tried-it, ratings, and explored count — across every device.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Settings &amp; Account — The Global Food Encyclopedia">
+<meta property="og:description" content="Sign in to sync your shelf across every device.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/settings.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* Settings page additions. */
+.auth-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin: 26px 0; }
+.auth-card {
+  background: var(--surface); border: 1px solid var(--card-edge);
+  border-radius: 10px; padding: 26px 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.auth-card h3 { color: var(--text); font-size: 1.15rem; margin: 0 0 8px; }
+.auth-card .helper { color: var(--muted); font-size: .92rem; margin: 0 0 14px; }
+.auth-card input {
+  width: 100%; box-sizing: border-box; margin: 0 0 12px; padding: 12px 14px;
+  border-radius: 8px; border: 1px solid var(--card-edge);
+  background: var(--surface-2); color: var(--text); font-size: 1rem;
+}
+.auth-card input::placeholder { color: var(--muted); }
+.auth-card .gold-btn { width: 100%; }
+.auth-error {
+  color: #e8a0a0; background: rgba(160, 40, 40, .12);
+  border: 1px solid rgba(200, 90, 90, .4); border-radius: 8px;
+  padding: 12px 16px; margin: 6px 0 0;
+}
+.auth-note { color: var(--muted); font-style: italic; margin-top: 14px; }
+#codeStep { margin-top: 4px; }
+.danger-zone {
+  margin-top: 34px; padding-top: 26px;
+  border-top: 1px solid var(--card-edge);
+}
+.danger-zone h3 { color: var(--text); }
+.danger-btn {
+  background: transparent; color: #e8a0a0; cursor: pointer;
+  border: 1px solid rgba(200, 90, 90, .55); border-radius: 999px;
+  padding: 12px 26px; font-size: .95rem; letter-spacing: 1px;
+}
+.danger-btn:hover { background: rgba(160, 40, 40, .15); }
+.account-line { font-size: 1.05rem; color: var(--text); }
+.sync-line { color: var(--muted); font-size: .95rem; }
+.notice-box {
+  background: var(--surface); border: 1px solid var(--card-edge);
+  border-radius: 10px; padding: 26px 28px; margin: 26px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.notice-box p { color: var(--text-soft); }
+</style>
+
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="settings.html" class="current">Settings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="settings.html" class="account-chip">Sign in</a>
+</nav>
+
+<header class="page-head">
+  <p class="kicker">The World Food Encyclopedia</p>
+  <h1>Settings &amp; <span class="gold">Account</span></h1>
+  <p class="sub">Sign in to carry your shelf — favorites, want-to-try, tried-it, ratings, and explored count — across every device.</p>
+</header>
+
+<main class="content-narrow">
+
+  <!-- Shown when the site owner has not connected Firebase yet. -->
+  <section id="authNotConfigured" hidden>
+    <h2>Account</h2>
+    <div class="notice-box">
+      <p><strong>Sign-in isn't set up yet.</strong> The site owner is still connecting the account service — until then, everything on this site keeps working with your data saved privately in this browser.</p>
+      <p>Your shelf (favorites, want-to-try, tried-it, star ratings, and explored count) is stored in this browser's local storage right now. Come back after sign-in launches and your shelf will start syncing across devices.</p>
+    </div>
+  </section>
+
+  <!-- Shown when Firebase is configured and nobody is signed in. -->
+  <section id="authSignedOut" hidden>
+    <h2>Sign in</h2>
+    <p>Choose any method — they all lead to the same synced shelf.</p>
+    <div class="auth-methods">
+      <div class="auth-card">
+        <h3>Continue with Google</h3>
+        <p class="helper">The fastest way in — one tap, no new password.</p>
+        <button type="button" id="googleBtn" class="gold-btn">Continue with Google</button>
+      </div>
+      <div class="auth-card">
+        <h3>Phone number</h3>
+        <p class="helper">We text you a one-time code. Standard messaging rates may apply.</p>
+        <input id="phoneInput" type="tel" autocomplete="tel" placeholder="+1 555 123 4567" aria-label="Phone number with country code">
+        <button type="button" id="sendCodeBtn" class="gold-btn">Send code</button>
+        <div id="codeStep" hidden>
+          <input id="codeInput" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" aria-label="Verification code">
+          <button type="button" id="verifyCodeBtn" class="gold-btn">Verify &amp; sign in</button>
+        </div>
+        <div id="recaptcha-container" aria-hidden="true"></div>
+      </div>
+      <div class="auth-card">
+        <h3>Email &amp; password</h3>
+        <p class="helper">New here? We will create your account automatically on first sign-in.</p>
+        <input id="emailInput" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email address">
+        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Password (6+ characters)" aria-label="Password">
+        <button type="button" id="emailBtn" class="gold-btn">Sign in / Create account</button>
+      </div>
+    </div>
+    <p class="auth-error" id="authError" role="alert" hidden></p>
+  </section>
+
+  <!-- Shown when someone is signed in. -->
+  <section id="authSignedIn" hidden>
+    <h2>Your account</h2>
+    <p class="account-line">Signed in as <strong id="accountName"></strong></p>
+    <p>Your shelf syncs across devices. Favorite a dish on your phone and it will be waiting on your laptop.</p>
+    <p class="sync-line" id="syncStatus"></p>
+    <p><button type="button" id="signOutBtn" class="gold-btn">Sign out</button></p>
+    <div class="danger-zone">
+      <h3>Danger zone</h3>
+      <p><button type="button" id="eraseCloudBtn" class="danger-btn">Erase my cloud data</button></p>
+      <p class="helper">Deletes your synced shelf from our servers. Everything saved on this device stays exactly as it is.</p>
+    </div>
+  </section>
+
+  <h2>Your data</h2>
+  <p><strong>On this device:</strong> your shelf is always saved in this browser's local storage first — it works offline and never needs an account.</p>
+  <p><strong>In the cloud:</strong> when you sign in, a copy of your shelf is stored in a private database document that only your account can read or write. That copy is what follows you to your other devices.</p>
+  <p>The account service runs on a Firebase project controlled by the site owner. Your sign-in details (email, phone number, or Google profile) are handled directly by Google's authentication service — this site never sees your password.</p>
+
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="assistant.js"></script>
+<script src="cursor-glow.js"></script>
+<script src="collections.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script>
+/* Settings page: account UI driven by window.FoodAuth. */
+(function () {
+  "use strict";
+
+  function $(id) { return document.getElementById(id); }
+  function show(el) { if (el) el.hidden = false; }
+  function hide(el) { if (el) el.hidden = true; }
+
+  function showError(err) {
+    var box = $("authError");
+    if (!box) return;
+    var msg = (window.FoodAuth && window.FoodAuth.friendlyError)
+      ? window.FoodAuth.friendlyError(err)
+      : "Something went wrong — please try again.";
+    box.textContent = msg;
+    show(box);
+  }
+  function clearError() {
+    var box = $("authError");
+    if (box) { box.textContent = ""; hide(box); }
+  }
+
+  function setBusy(btn, busy, label) {
+    if (!btn) return;
+    btn.disabled = busy;
+    if (busy) { btn.setAttribute("data-label", btn.textContent); btn.textContent = "Working…"; }
+    else if (btn.getAttribute("data-label")) { btn.textContent = btn.getAttribute("data-label"); }
+  }
+
+  function describeUser(u) {
+    return u.displayName || u.email || u.phoneNumber || "your account";
+  }
+
+  function refreshSyncLine() {
+    var line = $("syncStatus");
+    if (!line || !window.FoodAuth) return;
+    var t = window.FoodAuth.lastSyncedAt();
+    line.textContent = t
+      ? "Last synced " + t.toLocaleString() + "."
+      : "Sync is active — your next change will be uploaded.";
+  }
+
+  function renderSignedIn(user) {
+    hide($("authNotConfigured")); hide($("authSignedOut")); show($("authSignedIn"));
+    var nameEl = $("accountName");
+    if (nameEl) nameEl.textContent = describeUser(user);
+    refreshSyncLine();
+  }
+  function renderSignedOut() {
+    hide($("authNotConfigured")); hide($("authSignedIn")); show($("authSignedOut"));
+    clearError();
+    hide($("codeStep"));
+  }
+
+  function init() {
+    var FA = window.FoodAuth;
+    if (!FA || !FA.isConfigured()) {
+      hide($("authSignedOut")); hide($("authSignedIn")); show($("authNotConfigured"));
+      return;
+    }
+
+    $("googleBtn").addEventListener("click", function () {
+      clearError(); setBusy($("googleBtn"), true);
+      FA.signInWithGoogle()
+        .catch(showError)
+        .then(function () { setBusy($("googleBtn"), false); });
+    });
+
+    $("sendCodeBtn").addEventListener("click", function () {
+      clearError(); setBusy($("sendCodeBtn"), true);
+      var phone = $("phoneInput").value.trim();
+      FA.signInWithPhone(phone, "recaptcha-container")
+        .then(function () { show($("codeStep")); $("codeInput").focus(); })
+        .catch(showError)
+        .then(function () { setBusy($("sendCodeBtn"), false); });
+    });
+
+    $("verifyCodeBtn").addEventListener("click", function () {
+      clearError(); setBusy($("verifyCodeBtn"), true);
+      FA.confirmPhoneCode($("codeInput").value)
+        .catch(showError)
+        .then(function () { setBusy($("verifyCodeBtn"), false); });
+    });
+
+    $("emailBtn").addEventListener("click", function () {
+      clearError(); setBusy($("emailBtn"), true);
+      FA.signUpOrInWithEmail($("emailInput").value, $("passwordInput").value)
+        .catch(showError)
+        .then(function () { setBusy($("emailBtn"), false); });
+    });
+
+    $("signOutBtn").addEventListener("click", function () {
+      FA.signOut().catch(showError);
+    });
+
+    $("eraseCloudBtn").addEventListener("click", function () {
+      clearError();
+      if (!window.confirm("Erase your synced shelf from our servers? Your data on this device stays put.")) return;
+      setBusy($("eraseCloudBtn"), true);
+      FA.eraseCloudData()
+        .then(function () { refreshSyncLine(); })
+        .catch(showError)
+        .then(function () { setBusy($("eraseCloudBtn"), false); });
+    });
+
+    FA.onAuthStateChanged(function (user) {
+      if (user) renderSignedIn(user);
+      else renderSignedOut();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
