@@ -47,12 +47,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 20px; }
 .card h3 { margin: 8px 0 2px; font-size: 1.35rem; }
 .card .origin { color: var(--gold); font-size: .9rem; letter-spacing: 1px; text-transform: uppercase; }
 .card p.desc { color: var(--muted); font-size: .98rem; margin-top: 8px; }
-.card .score { margin-top: 14px; font-weight: bold; }
-.score-bar { height: 8px; background: #00000066; border-radius: 4px; margin-top: 6px; overflow: hidden; }
-.score-bar > div { height: 100%; border-radius: 4px; }
-.best .score-bar > div { background: linear-gradient(90deg, var(--green), var(--gold)); }
-.worst .score-bar > div { background: linear-gradient(90deg, var(--red), #7a2c2c); }
-.tag { display: inline-block; font-size: .75rem; padding: 3px 10px; border-radius: 999px; margin-top: 10px; }
+.card .why { color: var(--muted); font-size: .96rem; margin-top: 10px; }
+.card .why strong { color: var(--text); }
+.tag { display: inline-block; font-size: .78rem; padding: 4px 12px; border-radius: 999px; margin-top: 14px; font-weight: bold; }
 .best .tag { background: #7bc96f22; color: var(--green); }
 .worst .tag { background: #e0565622; color: var(--red); }
 footer { text-align: center; color: var(--muted); padding: 40px 20px; font-size: .9rem; }
