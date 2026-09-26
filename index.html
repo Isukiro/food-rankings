@@ -3,32 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Global Food Rankings — Best &amp; Worst Foods on Earth</title>
+<title>The Global Food Encyclopedia — Search Every Food on Earth</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="hero">
-  <p class="kicker">A Global Culinary Compendium</p>
-  <h1>The Global Food Rankings</h1>
-  <p class="sub">One hundred best and one hundred worst foods in the world — ranked from real global rankings, filterable by category, each with the research behind its rank.</p>
-  <div class="search-wrap">
-    <input id="search" type="text" placeholder="Search any food… (try 'curry' or 'Sweden')" autocomplete="off">
-  </div>
+  <p class="kicker">The World Food Encyclopedia</p>
+  <h1>Every Food on Earth, <span class="gold">Explained</span></h1>
+  <p class="sub">Search hundreds of dishes, snacks, desserts and drinks from every continent — with definitions, real global rankings, and the research behind them.</p>
   <div class="tabs">
-    <button class="tab active" data-tab="best">🏆 The Best</button>
-    <button class="tab" data-tab="worst">🚫 The Worst</button>
+    <button class="tab active" data-tab="search">🔍 Food Search</button>
+    <button class="tab" data-tab="best">🏆 Top 100 Best</button>
+    <button class="tab" data-tab="worst">👎 Top 100 Worst</button>
   </div>
 </header>
 
 <main>
-  <section id="best" class="board active">
+  <section id="search" class="board active">
+    <div class="search-hero">
+      <input id="searchInput" type="text" placeholder="Search any food… (try 'dumpling', 'chocolate' or 'Japan')" autocomplete="off">
+      <button id="surpriseBtn" class="gold-btn">🎲 Surprise me</button>
+    </div>
+    <div class="chip-group">
+      <span class="chip-label">Category</span>
+      <div class="chips" id="searchCatChips"></div>
+    </div>
+    <div class="chip-group">
+      <span class="chip-label">Region</span>
+      <div class="chips" id="searchRegionChips"></div>
+    </div>
+    <p class="result-count" id="searchCount"></p>
+    <div class="grid" id="searchGrid"></div>
+    <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
+  </section>
+
+  <section id="best" class="board">
     <div class="board-head">
       <h2>The 100 Best Foods on Earth</h2>
-      <p>Following TasteAtlas's 100 Best Dishes ranking — and the research says why.</p>
+      <p>Following TasteAtlas's 100 Best Dishes ranking — with definitions and the research behind each rank.</p>
     </div>
-    <div class="chips" id="bestChips"></div>
+    <div class="chip-group">
+      <span class="chip-label">Category</span>
+      <div class="chips" id="bestCatChips"></div>
+    </div>
+    <div class="chip-group">
+      <span class="chip-label">Region</span>
+      <div class="chips" id="bestRegionChips"></div>
+    </div>
+    <p class="result-count" id="bestCount"></p>
     <div class="grid" id="bestGrid"></div>
-    <p class="empty" id="bestEmpty" style="display:none">No foods match your search. Try another craving.</p>
+    <p class="empty" id="bestEmpty" style="display:none">No foods match your filters.</p>
   </section>
 
   <section id="worst" class="board">
@@ -36,9 +60,17 @@
       <h2>The 100 Worst Foods on Earth</h2>
       <p>Following TasteAtlas's 100 Worst Rated Foods — legendary dishes, for all the wrong reasons.</p>
     </div>
-    <div class="chips" id="worstChips"></div>
+    <div class="chip-group">
+      <span class="chip-label">Category</span>
+      <div class="chips" id="worstCatChips"></div>
+    </div>
+    <div class="chip-group">
+      <span class="chip-label">Region</span>
+      <div class="chips" id="worstRegionChips"></div>
+    </div>
+    <p class="result-count" id="worstCount"></p>
     <div class="grid" id="worstGrid"></div>
-    <p class="empty" id="worstEmpty" style="display:none">No foods match your search. Lucky you.</p>
+    <p class="empty" id="worstEmpty" style="display:none">No foods match your filters. Lucky you.</p>
   </section>
 </main>
 
@@ -46,6 +78,7 @@
   <p>Built with ❤️ and strong opinions. Rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal — disagree loudly.</p>
 </footer>
 
+<script src="data/foods.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
