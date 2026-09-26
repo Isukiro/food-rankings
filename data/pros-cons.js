@@ -503,3 +503,6 @@ const PROS_CONS = {
   ]
  }
 };
+
+/* Expose on window for consistency. */
+window.PROS_CONS = PROS_CONS;
