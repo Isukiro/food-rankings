@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="The Global Food Encyclopedia — Search Every Food on Earth">
 <meta property="og:description" content="Hundreds of dishes from every continent, with definitions, global rankings, and the research behind them. Taste is personal.">
-<meta property="og:url" content="https://globalfoodencyclopedia.example/index.html">
+<meta property="og:url" content="https://isukiro.github.io/food-rankings/index.html">
 <meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="modal.css">
@@ -115,17 +115,94 @@
   <p class="hero-cta"><a class="gold-btn hero-btn" href="#search-section">Start exploring</a></p>
 </header>
 
+<section class="home-section search-section" id="search-section" aria-label="Search the encyclopedia">
+  <div class="section-head">
+    <h2>Search the Encyclopedia</h2>
+    <p>Enter a dish, ingredient, or country — then refine by category or region.</p>
+  </div>
+  <div class="search-hero">
+    <div class="search-input-wrap">
+      <input id="searchInput" type="text" placeholder="Search 1,203 foods — try &#8216;dumpling&#8217;, &#8216;chocolate&#8217;, or &#8216;Japan&#8217;" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchSuggest" aria-autocomplete="list">
+      <div id="searchSuggest" class="suggest-box" role="listbox" aria-label="Search suggestions" hidden></div>
+    </div>
+    <button id="surpriseBtn" class="gold-btn">Surprise me</button>
+  </div>
+  <p class="quick-strip"><span class="quick-label">Popular now</span><span id="quickLinks"></span></p>
+  <div class="search-filters" role="group" aria-label="Refine search results">
+    <div class="chip-group">
+      <span class="chip-label">Category —</span>
+      <div class="chips" id="searchCatChips"></div>
+    </div>
+    <div class="chip-group">
+      <span class="chip-label">Region —</span>
+      <div class="chips" id="searchRegionChips"></div>
+    </div>
+  </div>
+  <p class="result-count" id="searchCount"></p>
+  <div class="grid food-grid" id="searchGrid"></div>
+  <div class="search-more-wrap"><button type="button" id="searchMore" class="gold-btn" hidden>Show more</button></div>
+  <p class="empty" id="searchEmpty" style="display:none">No foods match your search. Try another term.</p>
+  <p class="cap-note" id="searchCap" style="display:none"></p>
+</section>
+
 <section class="home-section featured-section" aria-label="Food of the day">
   <div class="section-head">
     <h2>Food of the Day</h2>
-    <p>One dish, every day — the same pick for everyone, everywhere.</p>
+    <p>A new dish each day — the same selection for every visitor.</p>
   </div>
   <div id="featured-slot"></div>
 </section>
 
-<aside class="sage-callout" aria-label="Meet Sage, your AI food guide">
+<section class="home-section" id="recent-section" aria-label="Recently viewed" style="display:none">
+  <div class="section-head">
+    <h2>Recently viewed</h2>
+    <p>Foods you have opened recently — return to them directly.</p>
+  </div>
+  <div class="chips" id="recent-strip" style="flex-wrap:wrap"></div>
+</section>
+
+<main>
+  <section class="home-section" aria-label="Trending Now">
+    <div class="section-head">
+      <h2>Trending Now</h2>
+      <p>A selection from the two most discussed lists. The complete Top 100s are on the Rankings page.</p>
+    </div>
+    <div class="trending-grid">
+      <div class="trending-col">
+        <h3>Top 10 Best</h3>
+        <p class="col-sub">TasteAtlas 100 Best Dishes, 2025 · scores on a 10-point scale</p>
+        <ul class="preview-list" id="bestPreview"></ul>
+        <a class="see-all" href="rankings.html">See the full Top 100 →</a>
+      </div>
+      <div class="trending-col">
+        <h3>Top 10 Worst</h3>
+        <p class="col-sub">TasteAtlas 100 Worst Rated Foods, 2026 · scores on a 10-point scale</p>
+        <ul class="preview-list" id="worstPreview"></ul>
+        <a class="see-all" href="rankings.html">See the full Top 100 →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section" aria-label="Editor's Picks">
+    <div class="section-head">
+      <h2>Editor's Picks</h2>
+      <p>Six dishes selected by our editor, with personal tasting notes — distinct from the official rankings.</p>
+    </div>
+    <div class="picks-grid" id="picksGrid"></div>
+  </section>
+
+  <section class="home-section" aria-label="Latest Reviews">
+    <div class="section-head">
+      <h2>Latest Reviews</h2>
+      <p>Editor's reviews: considered, opinionated, and open to debate.</p>
+    </div>
+    <div class="reviews-grid" id="reviewsGrid"></div>
+  </section>
+</main>
+
+<aside class="sage-callout" aria-label="Meet Sage, your food guide">
   <span class="sage-callout-emoji">🧑‍🍳</span>
-  <div><strong>Meet Sage — your AI food guide.</strong><br>Ask about any of the 1,203 foods, compare two dishes head-to-head, or learn how the rankings are scored.</div>
+  <div><strong>Meet Sage — your food guide.</strong><br>Ask about any of the 1,203 foods, compare two dishes head to head, or learn how the rankings are scored.</div>
   <button type="button" id="sageCalloutBtn">Ask Sage</button>
 </aside>
 
@@ -138,85 +215,13 @@
 })();
 </script>
 
-<section class='home-section intro-cta' aria-label='New here'>
+<section class='home-section intro-cta' aria-label='Guided tour'>
   <div class='section-head'>
     <h2>New to the Encyclopedia?</h2>
-    <p>Take the 60-second tour and learn how to search, rank, vote and compare.</p>
+    <p>Take the 60-second guided tour — searching, rankings, voting, and comparing.</p>
     <p><button type='button' class='gold-btn' id='introTourBtn' style='padding:14px 34px;margin-top:10px'>Take the 60-second tour</button></p>
   </div>
 </section>
-<section class="home-section search-section" id="search-section" aria-label="Search the encyclopedia">
-  <div class="section-head">
-    <h2>Search the Encyclopedia</h2>
-    <p>Type a craving, a country, or an ingredient — then filter by category or region.</p>
-  </div>
-  <div class="search-hero">
-    <div class="search-input-wrap">
-      <input id="searchInput" type="text" placeholder="Search any food… (try 'dumpling', 'chocolate' or 'Japan')" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchSuggest" aria-autocomplete="list">
-      <div id="searchSuggest" class="suggest-box" role="listbox" aria-label="Search suggestions" hidden></div>
-    </div>
-    <button id="surpriseBtn" class="gold-btn">Surprise me</button>
-  </div>
-  <div class="chip-group">
-    <span class="chip-label">Category —</span>
-    <div class="chips" id="searchCatChips"></div>
-  </div>
-  <div class="chip-group">
-    <span class="chip-label">Region —</span>
-    <div class="chips" id="searchRegionChips"></div>
-  </div>
-  <p class="result-count" id="searchCount"></p>
-  <div class="grid food-grid" id="searchGrid"></div>
-  <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
-  <p class="cap-note" id="searchCap" style="display:none"></p>
-</section>
-
-<section class="home-section" id="recent-section" aria-label="Recently viewed" style="display:none">
-  <div class="section-head">
-    <h2>Recently viewed</h2>
-    <p>Foods you opened recently — jump back in with one tap.</p>
-  </div>
-  <div class="chips" id="recent-strip" style="flex-wrap:wrap"></div>
-</section>
-
-<main>
-  <section class="home-section" aria-label="Trending Now">
-    <div class="section-head">
-      <h2>Trending Now</h2>
-      <p>A taste of the two lists everyone argues about. Full Top 100s live on the Rankings page.</p>
-    </div>
-    <div class="trending-grid">
-      <div class="trending-col">
-        <h3>🏆 Top 10 Best</h3>
-        <p class="col-sub">TasteAtlas 100 Best Dishes, 2025 · scores mapped to a 10-point scale</p>
-        <ul class="preview-list" id="bestPreview"></ul>
-        <a class="see-all" href="rankings.html">See the full Top 100 →</a>
-      </div>
-      <div class="trending-col">
-        <h3>👎 Top 10 Worst</h3>
-        <p class="col-sub">TasteAtlas 100 Worst Rated Foods, 2026 · scores mapped to a 10-point scale</p>
-        <ul class="preview-list" id="worstPreview"></ul>
-        <a class="see-all" href="rankings.html">See the full Top 100 →</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="home-section" aria-label="Editor's Picks">
-    <div class="section-head">
-      <h2>Editor's Picks</h2>
-      <p>Six foods our editor keeps thinking about — personal tasting notes, not official rankings.</p>
-    </div>
-    <div class="picks-grid" id="picksGrid"></div>
-  </section>
-
-  <section class="home-section" aria-label="Latest Reviews">
-    <div class="section-head">
-      <h2>Latest Reviews</h2>
-      <p>Editor's reviews: subjective, strongly worded, and open to argument.</p>
-    </div>
-    <div class="reviews-grid" id="reviewsGrid"></div>
-  </section>
-</main>
 
 <footer class="site-footer">
   <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
@@ -240,7 +245,10 @@
 /* Homepage: food search engine + trending previews + editor's picks + latest reviews. */
 (function () {
   var state = { q: "", cat: "All", region: "All" };
-  var MAX_RESULTS = 60;
+  /* Search results are painted 24 at a time; "Show more" appends the next 24. */
+  var SEARCH_PAGE = 24;
+  var searchList = [];
+  var searchShown = 0;
 
   function scoreOf(f) {
     if (f.bestRank) return (10 - (f.bestRank - 1) * (3.5 / 99)).toFixed(1);
@@ -318,18 +326,29 @@
   }
 
   function renderSearch() {
-    var list = FOODS.filter(matchesFilters);
-    var shown = list.slice(0, MAX_RESULTS);
-    document.getElementById("searchGrid").innerHTML = shown.map(cardHTML).join("");
-    document.getElementById("searchEmpty").style.display = list.length ? "none" : "block";
+    searchList = FOODS.filter(matchesFilters);
+    searchShown = 0;
+    document.getElementById("searchGrid").innerHTML = "";
+    appendSearchResults();
+    document.getElementById("searchEmpty").style.display = searchList.length ? "none" : "block";
     document.getElementById("searchCount").textContent =
-      list.length ? ("Found " + list.length + " food" + (list.length === 1 ? "" : "s")) : "";
-    var cap = document.getElementById("searchCap");
-    if (list.length > MAX_RESULTS) {
-      cap.style.display = "block";
-      cap.textContent = "Showing the first " + MAX_RESULTS + " of " + list.length + " matches — refine your search to see more.";
+      searchList.length ? ("Found " + searchList.length + " food" + (searchList.length === 1 ? "" : "s")) : "";
+    document.getElementById("searchCap").style.display = "none";
+  }
+
+  function appendSearchResults() {
+    var next = searchList.slice(searchShown, searchShown + SEARCH_PAGE);
+    if (next.length) {
+      document.getElementById("searchGrid").insertAdjacentHTML("beforeend", next.map(cardHTML).join(""));
+      searchShown += next.length;
+    }
+    var remaining = searchList.length - searchShown;
+    var more = document.getElementById("searchMore");
+    if (remaining > 0) {
+      more.hidden = false;
+      more.textContent = "Show more (" + remaining + " remaining)";
     } else {
-      cap.style.display = "none";
+      more.hidden = true;
     }
   }
 
@@ -522,10 +541,30 @@
   var regions = Array.from(new Set(FOODS.map(function (f) { return f.region; }))).sort();
   buildChips("searchCatChips", categories, "cat");
   buildChips("searchRegionChips", regions, "region");
+
+  /* "Popular now" quick searches — one tap fills the search box and runs it. */
+  (function () {
+    var QUICK = ["Sushi", "Tacos", "Kimchi", "Croissant", "Pho"];
+    var ql = document.getElementById("quickLinks");
+    if (!ql) return;
+    ql.innerHTML = QUICK.map(function (q) {
+      return '<button type="button" class="quick-link" data-q="' + escAttr(q) + '">' + q + '</button>';
+    }).join("");
+    ql.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest(".quick-link") : null;
+      if (!b) return;
+      var q = b.getAttribute("data-q");
+      state.q = q;
+      document.getElementById("searchInput").value = q;
+      renderSearch();
+      document.getElementById("searchGrid").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  })();
   document.getElementById("searchInput").addEventListener("input", function (e) {
     state.q = e.target.value;
     renderSearch();
   });
+  document.getElementById("searchMore").addEventListener("click", appendSearchResults);
   document.getElementById("surpriseBtn").addEventListener("click", function () {
     if (typeof window.openSurprise === "function") { window.openSurprise(); return; }
     var f = FOODS[Math.floor(Math.random() * FOODS.length)];
@@ -538,6 +577,7 @@
     document.getElementById("searchEmpty").style.display = "none";
     document.getElementById("searchCount").textContent = "A surprise for you: " + f.name;
     document.getElementById("searchCap").style.display = "none";
+    document.getElementById("searchMore").hidden = true;
     document.getElementById("searchGrid").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   renderSearch();
