@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Shelf — The Global Food Encyclopedia</title>
+<meta name="description" content="Your personal food shelf: favorites, want-to-try, tried-it, and your own ratings — saved on this device.">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="shelf.css">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html" class="current">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
+</nav>
+
+<main class="shelf-wrap">
+  <header class="shelf-head">
+    <p class="kicker">Personal Collections</p>
+    <h1>My <span class="gold">Shelf</span></h1>
+    <p class="sub">Everything you save, rate, and explore lives here — stored privately on this device.</p>
+  </header>
+
+  <section class="shelf-progress" aria-label="Exploration progress">
+    <div class="count" id="shelfCount">I explored <strong>0</strong> / 1203 foods</div>
+    <div class="shelf-bar" role="progressbar" aria-label="Foods explored"><span id="shelfBar"></span></div>
+    <div class="hint" id="shelfPct">0% of the encyclopedia explored</div>
+  </section>
+
+  <div class="shelf-actions">
+    <button type="button" class="btn-ghost" id="shelfExport">Download my data (JSON)</button>
+    <button type="button" class="btn-ghost danger" id="shelfClear">Clear my shelf</button>
+  </div>
+
+  <div class="shelf-tabs" id="shelfTabs" role="tablist" aria-label="My Shelf sections"></div>
+  <div id="shelfList" role="tabpanel"></div>
+
+  <p class="shelf-note">Hearts, stars, checks, and ratings are saved only in this browser. Open any food to mark it explored — your count grows as you browse.</p>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="collections.js"></script>
+<script src="shelf.js"></script>
+<script src="assistant.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
+</body>
+</html>
