@@ -100,15 +100,23 @@
     return best;
   }
 
-  function card(name, emoji, count, top, href) {
+  function card(name, emoji, count, ranked, top, href) {
+    var countLine = ranked === null
+      ? count + (count === 1 ? ' dish' : ' dishes')
+      : ranked + ' ranked · ' + count + (count === 1 ? ' dish' : ' dishes');
     var topLine = top
       ? 'Top dish: <strong>' + esc(top.name) + '</strong> (#' + top.bestRank + ')'
       : 'No ranked dishes yet';
     return '<a class="cat-card" href="' + esc(href) + '">' +
       '<span class="cat-emoji" aria-hidden="true">' + emoji + '</span>' +
       '<h3>' + esc(name) + '</h3>' +
-      '<p class="cat-count">' + count + (count === 1 ? ' dish' : ' dishes') + '</p>' +
+      '<p class="cat-count">' + countLine + '</p>' +
       '<p class="cat-top">' + topLine + '</p></a>';
+  }
+
+  function isRanked(f) {
+    return (f.bestRank !== null && f.bestRank !== undefined) ||
+           (f.worstRank !== null && f.worstRank !== undefined);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -122,12 +130,13 @@
     }
     catGrid.innerHTML = CAT_META.map(function (m) {
       var items = FOODS.filter(function (f) { return f.category === m[0]; });
-      return card(m[0], m[1], items.length, topDish(items),
-        'rankings.html?tab=best&category=' + encodeURIComponent(m[0]));
+      var ranked = items.filter(isRanked).length;
+      return card(m[0], m[1], items.length, ranked, topDish(items),
+        'rankings.html?view=category&category=' + encodeURIComponent(m[0]));
     }).join('');
     regGrid.innerHTML = REGION_META.map(function (m) {
       var items = FOODS.filter(function (f) { return f.region === m[0]; });
-      return card(m[0], m[1], items.length, topDish(items),
+      return card(m[0], m[1], items.length, null, topDish(items),
         'rankings.html?tab=best&region=' + encodeURIComponent(m[0]));
     }).join('');
   });
