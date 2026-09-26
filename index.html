@@ -76,18 +76,34 @@
 
 <nav class="site-nav" aria-label="Site navigation">
   <a href="index.html" class="current">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <div class="nav-group">
+    <button type="button" class="nav-group-btn" aria-haspopup="true" aria-expanded="false">Explore <span class="nav-caret" aria-hidden="true">▾</span></button>
+    <div class="nav-menu" role="menu" aria-label="Explore">
+      <a href="rankings.html" role="menuitem">Rankings</a>
+      <a href="tops.html" role="menuitem">Category Tops</a>
+      <a href="categories.html" role="menuitem">Categories</a>
+      <a href="map.html" role="menuitem">Flavor Map</a>
+      <a href="tree.html" role="menuitem">Food Trees</a>
+    </div>
+  </div><span class="nav-divider" aria-hidden="true">◆</span>
+  <div class="nav-group">
+    <button type="button" class="nav-group-btn" aria-haspopup="true" aria-expanded="false">Community <span class="nav-caret" aria-hidden="true">▾</span></button>
+    <div class="nav-menu" role="menu" aria-label="Community">
+      <a href="community.html" role="menuitem">Community</a>
+      <a href="shelf.html" role="menuitem">My Shelf</a>
+      <a href="cookbook.html" role="menuitem">Cookbook</a>
+    </div>
+  </div><span class="nav-divider" aria-hidden="true">◆</span>
+  <div class="nav-group">
+    <button type="button" class="nav-group-btn" aria-haspopup="true" aria-expanded="false">Help <span class="nav-caret" aria-hidden="true">▾</span></button>
+    <div class="nav-menu" role="menu" aria-label="Help">
+      <a href="#" id="sage-nav-link" role="menuitem">🧑‍🍳 Ask Sage</a>
+      <a href="#" id="tour-nav-link" role="menuitem">Take the Tour</a>
+      <a href="about.html" role="menuitem">About</a>
+      <a href="contact.html" role="menuitem">Contact</a>
+    </div>
+  </div><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="settings.html">Settings</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="settings.html" class="account-chip">Sign in</a>
 </nav>
 
@@ -142,11 +158,11 @@
     <button id="surpriseBtn" class="gold-btn">Surprise me</button>
   </div>
   <div class="chip-group">
-    <span class="chip-label">Category</span>
+    <span class="chip-label">Category —</span>
     <div class="chips" id="searchCatChips"></div>
   </div>
   <div class="chip-group">
-    <span class="chip-label">Region</span>
+    <span class="chip-label">Region —</span>
     <div class="chips" id="searchRegionChips"></div>
   </div>
   <p class="result-count" id="searchCount"></p>
@@ -217,7 +233,6 @@
 <script src="tour.js"></script>
 <script src="theme.js"></script>
 <script src="cookbook.js"></script>
-<script src="fotd.js"></script>
 <script src="assistant.js"></script>
 <script src="cursor-glow.js"></script>
 <script src="search-plus.js"></script>
@@ -263,12 +278,14 @@
   }
 
   function cardHTML(f) {
+    var flavors = flavorPillsHTML(f.name);
     return '<article class="card food-card" data-food-name="' + escAttr(f.name) + '">'
       + mediaHTML(f)
       + '<div class="food-card-body">'
       + '<h3>' + f.name + '</h3>'
       + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
       + '<div class="cat-row">' + catTagHTML(f) + rankBadge(f) + '</div>'
+      + (flavors ? '<a class="flavor-line" href="map.html" title="See it on the Flavor Map">' + flavors + '</a>' : '')
       + '<p class="food-card-def">' + f.definition + '</p>'
       + '</div></article>';
   }
@@ -390,8 +407,65 @@
     }).join("");
   }
 
-  /* Featured Dish — mirrors the deterministic Food of the Day pick from
-   * fotd.js (days since 2026-01-01 UTC, mod FOODS.length) so both agree. */
+  /* Food of the Day — deterministic pick: days since 2026-01-01 UTC,
+   * mod FOODS.length, so every visitor sees the same dish each day.
+   * Renders a compact teaser card first; clicking expands it in place
+   * into the full showcase. Clicking again (or the ×) collapses it. */
+  var fotdFood = null;
+  var fotdExpanded = false;
+
+  function flavorPillsHTML(name) {
+    var t = (window.FOOD_TASTES || {})[name];
+    if (!t || !t.tags || !t.tags.length) return "";
+    var tags = t.tags.slice(0, 4).map(function (tag) {
+      return '<span class="flavor-pill">' + tag + '</span>';
+    }).join("");
+    return '<span class="flavor-label">Flavors</span>' + tags;
+  }
+
+  function fotdWeekday() {
+    return new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  }
+
+  function renderFotdTeaser() {
+    var f = fotdFood;
+    var url = photoURLFor(f);
+    var thumb = url
+      ? '<img class="fotd-teaser-photo" src="' + escAttr(url) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : "";
+    return '<article class="fotd-teaser" id="fotdCard" role="button" tabindex="0" aria-expanded="false" aria-label="Reveal today\u2019s dish">'
+      + '<div class="fotd-teaser-media"><div class="emoji-tile" aria-hidden="true">' + f.emoji + '</div>' + thumb + '</div>'
+      + '<div class="fotd-teaser-body">'
+      + '<p class="kicker">Food of the Day · ' + fotdWeekday() + '</p>'
+      + '<h3>' + f.name + '</h3>'
+      + '<p class="fotd-reveal-hint">Tap to reveal <span aria-hidden="true">▾</span></p>'
+      + '<p class="fotd-comeback">Next dish in <span id="fotdCountdown">…</span></p>'
+      + '</div></article>';
+  }
+
+  function renderFotdShowcase() {
+    var f = fotdFood;
+    var url = photoURLFor(f);
+    var media = url
+      ? '<img class="fotd-showcase-photo" src="' + escAttr(url) + '" alt="Photo of ' + escAttr(f.name) + '" loading="lazy" onerror="this.remove()">'
+      : '<div class="emoji-tile fotd-showcase-emoji" aria-hidden="true">' + f.emoji + '</div>';
+    var flavors = flavorPillsHTML(f.name);
+    return '<article class="fotd-showcase" id="fotdCard">'
+      + '<button type="button" class="fotd-collapse" id="fotdCollapse" aria-label="Collapse today\u2019s dish">×</button>'
+      + '<div class="fotd-showcase-media">' + media + '</div>'
+      + '<div class="fotd-showcase-body">'
+      + '<p class="kicker">Food of the Day · ' + fotdWeekday() + '</p>'
+      + '<h2>' + f.name + '</h2>'
+      + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
+      + '<div class="cat-row">' + catTagHTML(f) + rankBadge(f) + '</div>'
+      + (flavors ? '<a class="flavor-line" href="map.html" title="See it on the Flavor Map">' + flavors + '</a>' : '')
+      + '<p class="featured-note">' + f.definition + '</p>'
+      + '<p class="featured-research"><strong>Why it matters —</strong> ' + f.research + '</p>'
+      + '<p class="fotd-comeback">A new dish every day — come back tomorrow. Next dish in <span id="fotdCountdown">…</span></p>'
+      + '<p class="featured-cta"><a class="gold-btn featured-btn" href="food.html?name=' + encodeURIComponent(f.name) + '">Read the full story</a></p>'
+      + '</div></article>';
+  }
+
   function renderFeatured() {
     var slot = document.getElementById("featured-slot");
     if (!slot || typeof FOODS === "undefined" || !FOODS.length) return;
@@ -399,25 +473,31 @@
     var days = Math.floor((Date.now() - epoch) / 86400000);
     var f = FOODS[((days % FOODS.length) + FOODS.length) % FOODS.length];
     if (!f) return;
-    var weekday = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-    var url = photoURLFor(f);
-    var photo = url
-      ? '<img class="featured-photo" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy" onerror="this.remove()">'
-      : "";
-    slot.innerHTML =
-      '<article class="featured-spread">'
-      + '<div class="featured-media"><div class="emoji-tile" aria-hidden="true">' + f.emoji + '</div>' + photo + '</div>'
-      + '<div class="featured-body">'
-      + '<p class="kicker">Food of the Day · ' + weekday + '</p>'
-      + '<h2>' + f.name + '</h2>'
-      + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
-      + '<div class="cat-row">' + catTagHTML(f) + rankBadge(f) + '</div>'
-      + '<p class="featured-note">' + f.definition + '</p>'
-      + '<p class="featured-research"><strong>Why it matters —</strong> ' + f.research + '</p>'
-      + '<p class="fotd-comeback">A new dish every day — come back tomorrow. Next dish in <span id="fotdCountdown">…</span></p>'
-      + '<p class="featured-cta"><a class="gold-btn featured-btn" href="food.html?name=' + encodeURIComponent(f.name) + '">Read the full story</a></p>'
-      + '</div></article>';
+    fotdFood = f;
+    fotdExpanded = false;
+    slot.innerHTML = renderFotdTeaser();
+    bindFotdToggle();
     startFotdCountdown();
+  }
+
+  function toggleFotd() {
+    var slot = document.getElementById("featured-slot");
+    if (!slot || !fotdFood) return;
+    fotdExpanded = !fotdExpanded;
+    slot.innerHTML = fotdExpanded ? renderFotdShowcase() : renderFotdTeaser();
+    bindFotdToggle();
+    startFotdCountdown();
+  }
+
+  function bindFotdToggle() {
+    var card = document.getElementById("fotdCard");
+    if (!card) return;
+    var close = document.getElementById("fotdCollapse");
+    if (close) close.addEventListener("click", function (e) { e.stopPropagation(); toggleFotd(); });
+    card.addEventListener("click", function () { toggleFotd(); });
+    card.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleFotd(); }
+    });
   }
 
   /* Live countdown to local midnight — a reason to come back tomorrow. */
