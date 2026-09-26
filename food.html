@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Detail | The Global Food Encyclopedia</title>
+<meta name="description" content="Full food profile: origin and history, ingredients, traditional preparation, flavor, texture, variations, nutrition, and why it ranks where it does.">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="food.css">
+<link rel="stylesheet" href="timeline.css">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">Ask Sage</a>
+</nav>
+
+<main class="food-page">
+  <a class="food-back" href="rankings.html">&larr; Back to rankings</a>
+  <div id="foodRoot" aria-live="polite">
+    <p class="coming-soon-note">Loading the food profile&hellip;</p>
+  </div>
+
+  <!-- Food DNA mount point. dna.js is provided by another agent; when it
+       lands, include it here:
+       <script src="dna.js"></script>
+       It renders into #foodDna below. -->
+  <div id="foodDna"></div>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="data/photos.js"></script>
+<script src="food-details.js"></script>
+<script src="theme.js"></script>
+<script src="assistant.js"></script>
+<script src="tastes.js"></script>
+<script src="food-relations.js"></script>
+<script src="food-timelines.js"></script>
+<script src="timeline.js"></script>
+<script src="pronunciations.js"></script>
+<script src="dna.js"></script>
+<script src="food.js"></script>
+<script>
+/* Food DNA section wiring (dna.js) + H-agent injector: pronunciation, timeline, family preview. */
+(function () {
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function foodName(){
+    try { return decodeURIComponent(new URLSearchParams(location.search).get("name") || ""); }
+    catch (e) { return ""; }
+  }
+  function init(){
+    try {
+      var root = document.getElementById("foodRoot");
+      var name = foodName();
+      if (!root || !name) return;
+      /* Shelf: count this food as explored */
+      if (window.Shelf && typeof window.Shelf.viewed === "function") {
+        try { window.Shelf.viewed(name); } catch (e) {}
+      }
+      /* 1. Pronunciation next to the food name */
+      var pron = (window.PRONUNCIATIONS || {})[name];
+      var h1 = root.querySelector("h1");
+      if (pron && h1 && !h1.querySelector(".pron")) {
+        var sp = document.createElement("span");
+        sp.className = "pron";
+        sp.innerHTML = '<span class="pron-label">say it:</span> ' + esc(pron);
+        h1.appendChild(sp);
+      }
+      /* 2. Personal star rating (My Shelf) under the name */
+      if (h1 && window.Shelf && !document.getElementById("myStars")) {
+        var wrap = document.createElement("div");
+        wrap.id = "myStars";
+        wrap.className = "my-stars";
+        wrap.innerHTML = '<span class="my-stars-label">My rating:</span> ' +
+          [1,2,3,4,5].map(function (n) {
+            return '<button type="button" data-star="' + n + '" aria-label="Rate ' + n + ' stars">\u2605</button>';
+          }).join("");
+        h1.appendChild(wrap);
+        var cur = window.Shelf.getRating(name) || 0;
+        paint(cur);
+        wrap.addEventListener("click", function (e) {
+          var b = e.target.closest ? e.target.closest("[data-star]") : null;
+          if (!b) return;
+          var n = parseInt(b.getAttribute("data-star"), 10);
+          window.Shelf.rate(name, n);
+          paint(n);
+        });
+        function paint(n) {
+          Array.prototype.forEach.call(wrap.querySelectorAll("[data-star]"), function (b) {
+            b.classList.toggle("lit", parseInt(b.getAttribute("data-star"), 10) <= n);
+          });
+        }
+      }
+      /* 3. Shelf toggle buttons (heart/star/check) */
+      if (h1 && window.Shelf && typeof window.Shelf.toggleButtonHTML === "function" && !document.getElementById("shelfBtns")) {
+        var sb = document.createElement("div");
+        sb.id = "shelfBtns";
+        sb.className = "food-shelf-btns";
+        sb.innerHTML = window.Shelf.toggleButtonHTML(name);
+        h1.appendChild(sb);
+      }
+      /* 4. Food DNA radar */
+      var dnaSec = document.getElementById("foodDnaSec");
+      if (!dnaSec) {
+        dnaSec = document.createElement("section");
+        dnaSec.className = "food-section";
+        dnaSec.id = "foodDnaSec";
+        dnaSec.innerHTML = "<h2>Food DNA</h2><div id=\"foodDna\"></div>";
+        root.appendChild(dnaSec);
+      }
+      if (window.renderFoodDNA) {
+        try { window.renderFoodDNA(document.getElementById("foodDna"), (window.FOOD_TASTES || {})[name], { label: "Taste profile of " + name }); } catch (e) {}
+      }
+      /* 5. Timeline section */
+      if (!document.getElementById("foodTimeline")) {
+        var tsec = document.createElement("section");
+        tsec.className = "food-section";
+        tsec.innerHTML = "<h2>Timeline</h2><div id=\"foodTimeline\"></div>";
+        root.appendChild(tsec);
+      }
+      if (window.renderTimeline) { try { window.renderTimeline(document.getElementById("foodTimeline"), name); } catch (e) {} }
+      /* 6. Food family preview */
+      if (!document.getElementById("foodFamily")) {
+        var rels = ((window.FOOD_RELATIONS || {})[name] || []).slice(0, 4);
+        var fsec = document.createElement("section");
+        fsec.className = "food-section";
+        fsec.id = "foodFamily";
+        var chips = rels.map(function (r) {
+          return '<a class="family-chip" href="food.html?name=' + encodeURIComponent(r) + '">' + esc(r) + "</a>";
+        }).join("");
+        fsec.innerHTML = "<h2>Food Family</h2>" +
+          '<p class="family-note">Dishes related to ' + esc(name) + ":</p>" +
+          '<div class="family-chips">' + chips + "</div>" +
+          '<a class="family-tree-link" href="tree.html?food=' + encodeURIComponent(name) + '">Open the full family tree &rarr;</a>';
+        root.appendChild(fsec);
+      }
+    } catch (e) { /* page stays usable */ }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function(){ setTimeout(init, 120); });
+  else setTimeout(init, 120);
+})();
+</script>
+<style>
+.pron { display:block; font-size:.55em; font-weight:400; color:#c9a227; letter-spacing:1px; margin-top:6px; }
+.pron-label { text-transform:uppercase; font-size:.8em; letter-spacing:2px; opacity:.75; }
+.my-stars { margin-top:10px; font-size:22px; }
+.my-stars-label { font-size:13px; color:#a9b0c3; margin-right:8px; letter-spacing:1px; text-transform:uppercase; }
+.my-stars button { background:none; border:none; color:#4a5570; cursor:pointer; font-size:22px; padding:0 2px; }
+.my-stars button.lit { color:#d4af37; }
+.food-shelf-btns { margin-top:10px; }
+.family-chips { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 16px; }
+.family-chip { border:1px solid rgba(201,162,39,.45); border-radius:999px; padding:8px 16px; color:#f4f1e8; text-decoration:none; font-size:14px; }
+.family-chip:hover { background:rgba(201,162,39,.15); }
+.family-tree-link { color:#c9a227; font-weight:600; }
+.family-note { color:#a9b0c3; margin:0; }
+</style>
+
+<script src="collections.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
+</body>
+</html>
