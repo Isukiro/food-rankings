@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://isukiro.github.io/food-rankings/sitemap.xml
