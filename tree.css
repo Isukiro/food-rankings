@@ -1,0 +1,180 @@
+/* Food Family Tree — navy/gold explorer styles. */
+
+.tree-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px 24px 72px;
+}
+
+.tree-hero { text-align: center; margin-bottom: 36px; }
+.tree-eyebrow {
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--gold, #c9a227);
+  margin: 0 0 10px;
+}
+.tree-hero h1 {
+  font-size: clamp(30px, 4.5vw, 46px);
+  margin: 0 0 12px;
+  color: var(--ink, #f4f1e8);
+  font-weight: 600;
+}
+.tree-sub {
+  max-width: 620px;
+  margin: 0 auto;
+  color: var(--muted, #a9b0c3);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.tree-controls {
+  max-width: 640px;
+  margin: 0 auto 28px;
+}
+.tree-search-label {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted, #a9b0c3);
+  margin-bottom: 10px;
+}
+.tree-search-row { display: flex; gap: 10px; }
+.tree-search-row input {
+  flex: 1;
+  padding: 13px 16px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink, #f4f1e8);
+}
+.tree-search-row input:focus {
+  outline: none;
+  border-color: var(--gold, #c9a227);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+}
+.tree-go-btn {
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: 1px solid var(--gold, #c9a227);
+  background: var(--gold, #c9a227);
+  color: #1a2340;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tree-go-btn:hover { filter: brightness(1.08); }
+.tree-hint {
+  font-size: 13px;
+  color: var(--muted, #a9b0c3);
+  margin: 10px 0 0;
+}
+
+.tree-stage {
+  position: relative;
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(201, 162, 39, 0.06), transparent 60%),
+    var(--navy-2, #141c33);
+  overflow: hidden;
+  min-height: 420px;
+}
+#treeSvg {
+  display: block;
+  width: 100%;
+  height: min(70vh, 640px);
+  min-height: 420px;
+  cursor: grab;
+  touch-action: none;
+}
+#treeSvg:active { cursor: grabbing; }
+
+.tree-zoom {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.tree-zoom button {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  background: rgba(20, 28, 51, 0.9);
+  color: var(--gold, #c9a227);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tree-zoom button:last-child { width: auto; padding: 0 12px; font-size: 13px; }
+.tree-zoom button:hover { background: rgba(201, 162, 39, 0.15); }
+
+.tree-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #a9b0c3);
+  font-style: italic;
+  padding: 24px;
+  text-align: center;
+}
+.tree-empty[hidden] { display: none; }
+
+/* SVG tree nodes */
+.tlink { stroke: rgba(201, 162, 39, 0.45); stroke-width: 1.5; }
+.tlink-l2 { stroke: rgba(201, 162, 39, 0.22); stroke-width: 1; stroke-dasharray: 5 4; }
+.tnode { cursor: pointer; }
+.tnode-box {
+  fill: #1c2547;
+  stroke: rgba(201, 162, 39, 0.5);
+  stroke-width: 1.5;
+  transition: filter 0.15s ease;
+}
+.tnode:hover .tnode-box, .tnode:focus .tnode-box {
+  filter: brightness(1.35);
+  stroke: var(--gold, #c9a227);
+}
+.tnode:focus { outline: none; }
+.tnode-l0 .tnode-box { fill: #2a1f0e; stroke: var(--gold, #c9a227); stroke-width: 2.5; }
+.tnode-l2 .tnode-box { fill: #161d36; stroke-width: 1; }
+.tnode-emoji { font-size: 22px; }
+.tnode-name {
+  fill: var(--ink, #f4f1e8);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.tnode-origin {
+  fill: var(--muted, #a9b0c3);
+  font-size: 11.5px;
+}
+.tnode-l0 .tnode-name { font-size: 15px; fill: var(--gold, #c9a227); }
+
+.tree-legend {
+  display: flex;
+  gap: 26px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  color: var(--muted, #a9b0c3);
+  font-size: 14px;
+}
+.legend-item { display: inline-flex; align-items: center; gap: 8px; }
+.legend-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.legend-root { background: var(--gold, #c9a227); }
+.legend-l1 { background: #2c3a6e; border: 1px solid rgba(201,162,39,.6); }
+.legend-l2 { background: #161d36; border: 1px dashed rgba(201,162,39,.5); }
+
+@media (max-width: 640px) {
+  .tree-wrap { padding: 32px 14px 52px; }
+  .tree-search-row { flex-direction: column; }
+  .tree-go-btn { width: 100%; }
+  #treeSvg { height: 62vh; min-height: 380px; }
+}
