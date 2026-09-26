@@ -556,3 +556,73 @@ footer {
   color: var(--text-quote); font-size: 0.88rem; font-style: italic; text-align: left;
 }
 #unrankedWrap { max-width: 1180px; margin: 0 auto; }
+
+/* ================= Sage — food guide chat assistant ================= */
+#sage-fab{position:fixed;right:22px;bottom:22px;z-index:400;width:60px;height:60px;border-radius:50%;
+border:1px solid var(--card-edge);cursor:pointer;font-size:1.7rem;line-height:1;
+background:var(--surface);box-shadow:0 10px 28px rgba(0,0,0,.45);transition:transform .2s ease,box-shadow .2s ease}
+#sage-fab:hover{transform:scale(1.07);box-shadow:0 10px 32px rgba(0,0,0,.55),0 0 18px color-mix(in srgb,var(--primary) 45%,transparent)}
+#sage-fab.open{transform:rotate(12deg) scale(1.05)}
+#sage-panel{position:fixed;right:22px;bottom:96px;z-index:400;width:384px;max-width:calc(100vw - 32px);
+height:560px;max-height:calc(100vh - 140px);display:none;flex-direction:column;overflow:hidden;
+background:var(--surface);border:1px solid var(--card-edge);border-radius:16px;
+box-shadow:0 24px 60px rgba(0,0,0,.55);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+#sage-panel.open{display:flex}
+.sage-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
+border-bottom:1px solid var(--card-edge);background:color-mix(in srgb,var(--primary) 10%,var(--surface))}
+.sage-title{font-family:Georgia,'Times New Roman',serif;font-size:1.05rem;letter-spacing:.5px;color:var(--text)}
+.sage-sub{font-size:.78rem;color:var(--muted);font-style:italic}
+#sage-close{background:none;border:0;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px;line-height:1}
+#sage-close:hover{color:var(--text)}
+.sage-msgs{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px}
+.sage-msg{max-width:88%;padding:10px 13px;border-radius:14px;font-size:.9rem;line-height:1.5;color:var(--text)}
+.sage-user{align-self:flex-end;background:color-mix(in srgb,var(--primary) 28%,var(--surface));
+border:1px solid var(--card-edge);border-bottom-right-radius:4px}
+.sage-bot{align-self:flex-start;background:var(--surface-2);border:1px solid var(--card-edge);
+border-bottom-left-radius:4px}
+.sage-bot p{margin:0 0 8px}.sage-bot p:last-child{margin-bottom:0}
+.sage-list{margin:6px 0;padding-left:20px}.sage-list li{margin-bottom:6px}
+.sage-ranked{list-style:none;padding-left:0}.sage-ranked li{padding:7px 10px;border-bottom:1px solid var(--card-edge)}
+.sage-dim{color:var(--muted);font-size:.82rem}
+.sage-foodcard{border:1px solid var(--card-edge);border-radius:10px;padding:10px;background:color-mix(in srgb,var(--primary) 6%,transparent)}
+.sage-foodhead{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.sage-emoji{font-size:1.9rem}
+.sage-foodname{font-family:Georgia,serif;font-weight:bold;font-size:1rem}
+.sage-foodmeta{font-size:.76rem;color:var(--muted);letter-spacing:.4px}
+.sage-def{margin:6px 0;font-style:italic;color:var(--text-quote)}
+.sage-rankline{font-size:.8rem;color:var(--accent);margin:6px 0;letter-spacing:.3px}
+.sage-stars{color:var(--accent)}
+.sage-research{font-size:.84rem;margin:6px 0 0;color:var(--text-soft)}
+.sage-compare{width:100%;border-collapse:collapse;font-size:.82rem;margin:8px 0}
+.sage-compare th,.sage-compare td{border:1px solid var(--card-edge);padding:7px 8px;text-align:left;vertical-align:top}
+.sage-compare th{background:color-mix(in srgb,var(--primary) 12%,transparent);font-family:Georgia,serif}
+.sage-verdict{font-size:.88rem;border-left:3px solid var(--primary);padding-left:10px}
+.sage-typing span{display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;
+background:var(--muted);animation:sage-blink 1.1s infinite}
+.sage-typing span:nth-child(2){animation-delay:.18s}.sage-typing span:nth-child(3){animation-delay:.36s}
+@keyframes sage-blink{0%,100%{opacity:.25}50%{opacity:1}}
+.sage-chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 10px}
+.sage-chip{background:none;border:1px solid var(--card-edge);border-radius:999px;padding:7px 13px;
+font-size:.8rem;color:var(--accent);cursor:pointer;font-family:inherit}
+.sage-chip:hover{background:color-mix(in srgb,var(--primary) 16%,transparent);color:var(--text)}
+.sage-form{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--card-edge)}
+.sage-form input{flex:1;background:var(--input-bg,rgba(0,0,0,.35));border:1px solid var(--card-edge);
+border-radius:999px;padding:10px 15px;color:var(--text);font-size:.9rem;font-family:inherit}
+.sage-form input:focus{outline:none;border-color:var(--accent)}
+.sage-form button{width:42px;height:42px;flex:none;border-radius:50%;border:0;cursor:pointer;
+background:var(--primary);color:#1a1405;font-size:1rem}
+.sage-form button:hover{background:var(--accent)}
+@media (max-width:520px){
+#sage-panel{right:12px;left:12px;bottom:12px;top:12px;width:auto;height:auto;max-height:none}
+#sage-fab{right:16px;bottom:16px}
+}
+
+/* ================= Cursor glow ================= */
+#cursor-glow{position:fixed;top:0;left:0;width:340px;height:340px;margin:-170px 0 0 -170px;
+border-radius:50%;pointer-events:none;z-index:9990;opacity:0;transition:opacity .45s ease;
+background:radial-gradient(circle,
+color-mix(in srgb,var(--accent,#d4af37) 22%,transparent) 0%,
+color-mix(in srgb,var(--primary,#c9a227) 9%,transparent) 45%,
+transparent 70%)}
+#cursor-glow.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#cursor-glow{display:none}}
