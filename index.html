@@ -39,7 +39,8 @@
   <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="contact.html">Contact</a>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a>
 </nav>
 
 <header class="hero">
@@ -63,6 +64,21 @@
   <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
   <p class="cap-note" id="searchCap" style="display:none"></p>
 </header>
+
+<section class='home-section intro-cta' aria-label='New here'>
+  <div class='section-head'>
+    <h2>New to the Encyclopedia?</h2>
+    <p>Take the 60-second tour and learn how to search, rank, vote and compare.</p>
+    <p><button type='button' class='gold-btn' id='introTourBtn' style='padding:14px 34px;margin-top:10px'>Take the 60-second tour</button></p>
+  </div>
+</section>
+<section class="home-section" aria-label="Food of the Day">
+  <div class="section-head">
+    <h2>Food of the Day</h2>
+    <p>A new dish every day — same for everyone, everywhere.</p>
+  </div>
+  <div id="fotd-slot" style="max-width:640px;margin:24px auto 0"></div>
+</section>
 
 <main>
   <section class="home-section" aria-label="Trending Now">
@@ -109,6 +125,10 @@
 
 <script src="data/foods.js"></script>
 <script src="data/photos.js"></script>
+<script src="tour.js"></script>
+<script src="theme.js"></script>
+<script src="cookbook.js"></script>
+<script src="fotd.js"></script>
 <script>
 /* Homepage: food search engine + trending previews + editor's picks + latest reviews. */
 (function () {
@@ -283,6 +303,13 @@
   renderPreview("worstPreview", worst10, false);
   renderPicks();
   renderReviews();
+
+  var introBtn = document.getElementById('introTourBtn');
+  if (introBtn) {
+    introBtn.addEventListener('click', function () {
+      if (window.startFoodTour) window.startFoodTour();
+    });
+  }
 })();
 </script>
 </body>
