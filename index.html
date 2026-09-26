@@ -10,7 +10,10 @@
 <header class="hero">
   <p class="kicker">A totally scientific* ranking</p>
   <h1>The Global Food Rankings</h1>
-  <p class="sub">The 15 best and 15 worst foods in the world — each with the research behind its rank. <span class="fine">Sources: TasteAtlas, CNN, UNESCO</span></p>
+  <p class="sub">30 best and 30 worst foods in the world — ranked using real global rankings (TasteAtlas, CNN, UNESCO), each with the research behind its rank.</p>
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="Search any food… (try 'curry' or 'Sweden')" autocomplete="off">
+  </div>
   <div class="tabs">
     <button class="tab active" data-tab="best">🏆 The Best</button>
     <button class="tab" data-tab="worst">🚫 The Worst</button>
@@ -20,18 +23,20 @@
 <main>
   <section id="best" class="board active">
     <div class="board-head">
-      <h2>The 15 Best Foods on Earth</h2>
-      <p>Crowned champions of the dinner table — and the research says why.</p>
+      <h2>The 30 Best Foods on Earth</h2>
+      <p>Following TasteAtlas's 100 Best Dishes ranking — and the research says why.</p>
     </div>
     <div class="grid" id="bestGrid"></div>
+    <p class="empty" id="bestEmpty" style="display:none">No foods match your search. Try another craving.</p>
   </section>
 
   <section id="worst" class="board">
     <div class="board-head">
-      <h2>The 15 Worst Foods on Earth</h2>
-      <p>Legendary dishes… for all the wrong reasons.</p>
+      <h2>The 30 Worst Foods on Earth</h2>
+      <p>Following TasteAtlas's 100 Worst Rated Foods — legendary dishes, for all the wrong reasons.</p>
     </div>
     <div class="grid" id="worstGrid"></div>
+    <p class="empty" id="worstEmpty" style="display:none">No foods match your search. Lucky you.</p>
   </section>
 </main>
 
