@@ -97,7 +97,11 @@
     '.fr-theme-reset{background:none;border:0;color:var(--accent,#d4af37);cursor:pointer;font-family:inherit;font-size:.85rem;text-decoration:underline;padding:0}',
     '.fr-theme-reset:hover{color:var(--text,#f2ecdc)}',
     '.fr-theme-close{position:absolute;top:8px;right:10px;background:none;border:0;color:var(--muted,#93a1bd);font-size:1.15rem;cursor:pointer;line-height:1;padding:4px}',
-    '.fr-theme-close:hover{color:var(--text,#f2ecdc)}'
+    '.fr-theme-close:hover{color:var(--text,#f2ecdc)}',
+    '.fr-theme-toggle{display:flex;align-items:center;gap:10px;margin:2px 0 14px;cursor:pointer;',
+    'font-size:.85rem;color:var(--text,#f2ecdc);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}',
+    '.fr-theme-toggle input{accent-color:var(--accent,#d4af37);width:16px;height:16px;cursor:pointer}',
+    '.fr-theme-toggle small{display:block;color:var(--muted,#93a1bd);font-size:.72rem}'
   ].join('');
 
   function injectStyles() {
@@ -134,6 +138,8 @@
       + '<label class="fr-theme-field">Primary<input type="color" id="fr-theme-primary" value="#c9a227"></label>'
       + '<label class="fr-theme-field">Accent<input type="color" id="fr-theme-accent" value="#d4af37"></label>'
       + '</div>'
+      + '<label class="fr-theme-toggle"><input type="checkbox" id="fr-theme-glow" checked>'
+      + '<span>Cursor glow<small>A soft light that follows your mouse</small></span></label>'
       + '<div class="fr-theme-foot"><button type="button" class="fr-theme-reset">Reset to default</button></div>';
     document.body.appendChild(panel);
     return panel;
@@ -148,6 +154,8 @@
     }
     var primaryPicker = panel.querySelector('#fr-theme-primary');
     var accentPicker = panel.querySelector('#fr-theme-accent');
+    var glowToggle = panel.querySelector('#fr-theme-glow');
+    if (glowToggle) glowToggle.checked = glowEnabled();
     if (sel.custom) {
       primaryPicker.value = sel.custom.primary;
       accentPicker.value = sel.custom.accent;
@@ -160,7 +168,22 @@
 
   function choose(sel) {
     applyTheme(sel);
+    // preserve the cursor-glow preference across theme changes
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var obj = raw ? JSON.parse(raw) : null;
+      if (obj && typeof obj === 'object' && obj.glow === false) sel.glow = false;
+    } catch (e) { /* ignore */ }
     persist(sel);
+  }
+
+  function glowEnabled() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return true; /* default ON */
+      var obj = JSON.parse(raw);
+      return !(obj && obj.glow === false);
+    } catch (e) { return true; }
   }
 
   function bindPanel(panel, btn) {
@@ -202,6 +225,24 @@
     panel.querySelector('#fr-theme-accent').addEventListener('change', function () {
       choose(customFromPickers()); syncPanel(panel);
     });
+
+    // cursor-glow toggle: persist inside fr_theme, notify cursor-glow.js live
+    var glowToggle = panel.querySelector('#fr-theme-glow');
+    if (glowToggle) {
+      glowToggle.addEventListener('change', function () {
+        var on = glowToggle.checked;
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          var obj = raw ? JSON.parse(raw) : {};
+          if (!obj || typeof obj !== 'object') obj = {};
+          obj.glow = on;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        } catch (e) { /* private mode */ }
+        try {
+          document.dispatchEvent(new CustomEvent('fr-glow', { detail: { on: on } }));
+        } catch (e2) { /* older browsers */ }
+      });
+    }
 
     btn.addEventListener('click', function () {
       panel.hidden = !panel.hidden;
