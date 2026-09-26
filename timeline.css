@@ -1,0 +1,64 @@
+/* Food timeline — vertical navy/gold timeline. */
+
+.food-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+.food-timeline::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--gold, #c9a227), rgba(201, 162, 39, 0.15));
+  border-radius: 2px;
+}
+.tl-item {
+  position: relative;
+  padding: 0 0 26px 38px;
+}
+.tl-item:last-child { padding-bottom: 4px; }
+.tl-dot {
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--navy-2, #141c33);
+  border: 2px solid var(--gold, #c9a227);
+  box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.12);
+}
+.tl-era {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold, #c9a227);
+  margin-bottom: 4px;
+}
+.tl-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--ink, #f4f1e8);
+  font-weight: 700;
+}
+.tl-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--muted, #a9b0c3);
+}
+.tl-empty {
+  border: 1px dashed rgba(201, 162, 39, 0.35);
+  border-radius: 12px;
+  padding: 26px 22px;
+  text-align: center;
+  color: var(--muted, #a9b0c3);
+  font-style: italic;
+  background: rgba(201, 162, 39, 0.04);
+}
+.tl-empty p { margin: 0; }
