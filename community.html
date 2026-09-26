@@ -48,6 +48,17 @@
 }
 .comments-shell h2 { color: var(--text); margin: 0 0 8px; }
 .comments-shell p { color: var(--muted); margin: 0 0 4px; line-height: 1.6; }
+.giscus-soon {
+  background: var(--bg);
+  border: 1px dashed var(--primary);
+  border-radius: 10px;
+  padding: 26px 24px;
+  text-align: center;
+  margin-top: 18px;
+}
+.giscus-soon p { color: var(--text-soft); line-height: 1.65; margin: 0 0 8px; }
+.giscus-soon p:last-child { margin-bottom: 0; }
+.giscus-soon strong { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -76,7 +87,7 @@
       <li>Install the <strong>giscus app</strong> on the <code>Isukiro/food-rankings</code> repo: <a href="https://github.com/apps/giscus">https://github.com/apps/giscus</a></li>
       <li>Create a discussion category called <strong>"Comments"</strong> (under the Discussions tab → Categories), then hand the <strong>category ID</strong> to the assistant so the embed below can be finalized with real IDs.</li>
     </ol>
-    <p class="note">Until those IDs are pasted into the embed block below, the comment box will show a placeholder configuration. Everything else on this page works normally.</p>
+    <p class="note">Until those IDs are pasted into the embed below, the discussion area shows a "coming soon" card instead of a broken comment box. Everything else on this page works normally.</p>
   </section>
 
   <p class="lead">Two things look similar on this site but do very different jobs: <strong>giscus comments</strong> are <em>public discussion</em> with other visitors — you'll need a free GitHub account to post, and everything you write is visible to everyone. The <strong>star ratings</strong> you see on rankings and food pages are the opposite: they are <em>your personal scores</em>, stored only in your own browser, never uploaded, never shared.</p>
@@ -88,36 +99,51 @@
     <p>Sign in with GitHub to post. Be kind: no spam, no hate, no spoiling somebody's dinner.</p>
 
     <!-- ================================================================
-         GISCUS EMBED BLOCK — COORDINATOR: find/replace the placeholders.
-         Steps once the owner finishes the setup checklist above:
-           1. Visit https://giscus.app and enter repo "Isukiro/food-rankings".
-           2. Copy the repo ID it shows, and replace the
-              data-repo-id="SETUP-NEEDED: ..." value below.
-           3. Create a "Comments" discussion category (or any category),
-              copy its category ID, and replace the
-              data-category-id="SETUP-NEEDED: ..." value below.
-              (data-category should then name that same category.)
-         Attribute reference (giscus documented embed format):
-           data-repo, data-repo-id, data-category, data-category-id,
-           data-mapping, data-strict, data-reactions-enabled,
-           data-emit-metadata, data-input-position, data-theme, data-lang
+         GISCUS EMBED — to take comments live, paste the real category ID
+         into data-category-id below (and the matching name in
+         data-category), then flip data-ready to "true". The bootstrap
+         script only loads giscus when it is configured; until then
+         visitors see a clean "coming soon" card, never a broken widget.
          ================================================================ -->
-    <script src="https://giscus.app/client.js"
-            data-repo="Isukiro/food-rankings"
-            data-repo-id="R_kgDOUsN95w"
-            data-category="SETUP-NEEDED: create a 'Comments' discussion category (repo Settings → Discussions must be enabled first)"
-            data-category-id="SETUP-NEEDED: paste category id"
-            data-mapping="pathname"
-            data-strict="0"
-            data-reactions-enabled="1"
-            data-emit-metadata="0"
-            data-input-position="top"
-            data-theme="dark"
-            data-lang="en"
-            crossorigin="anonymous"
-            async>
+    <div id="giscusMount"
+         data-repo="Isukiro/food-rankings"
+         data-repo-id="R_kgDOUsN95w"
+         data-category="Comments"
+         data-category-id="SETUP-NEEDED"
+         data-ready="false"></div>
+    <script>
+    (function () {
+      var mount = document.getElementById('giscusMount');
+      if (!mount) return;
+      var catId = mount.getAttribute('data-category-id') || '';
+      var ready = mount.getAttribute('data-ready') === 'true'
+        && catId.indexOf('SETUP-NEEDED') !== 0;
+      if (!ready) {
+        mount.innerHTML = '<div class="giscus-soon">'
+          + '<p><strong>💬 Comments open soon.</strong></p>'
+          + '<p>The discussion table is still being set — check back shortly. '
+          + 'In the meantime, the star ratings you give any dish are saved privately in your own browser.</p>'
+          + '</div>';
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.async = true;
+      s.setAttribute('crossorigin', 'anonymous');
+      ['repo', 'repo-id', 'category', 'category-id'].forEach(function (k) {
+        s.setAttribute('data-' + k, mount.getAttribute('data-' + k));
+      });
+      s.setAttribute('data-mapping', 'pathname');
+      s.setAttribute('data-strict', '0');
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'top');
+      s.setAttribute('data-theme', 'dark');
+      s.setAttribute('data-lang', 'en');
+      mount.appendChild(s);
+    })();
     </script>
-    <!-- ============ END GISCUS EMBED BLOCK ============ -->
+    <!-- ============ END GISCUS EMBED ============ -->
   </section>
 </main>
 
