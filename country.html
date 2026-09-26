@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Country — The Global Food Encyclopedia</title>
+<meta name="description" content="Every dish from one country in the Global Food Encyclopedia: stats, flavor fingerprint, top dishes, and the full food list.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Country — The Global Food Encyclopedia">
+<meta property="og:description" content="Stats, flavor fingerprint, top dishes, and every listed dish for a single country.">
+<meta property="og:url" content="https://isukiro.github.io/food-rankings/country.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="country.css">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
+</nav>
+
+<main class="country-wrap" id="countryWrap" hidden>
+  <a class="country-back" href="map.html">&larr; Back to the Flavor Map</a>
+
+  <header class="country-hero">
+    <span class="country-flag" id="countryFlag" aria-hidden="true">🌍</span>
+    <h1 id="countryName">Country</h1>
+    <p class="country-region" id="countryRegion"></p>
+  </header>
+
+  <section class="country-stats" id="countryStats" aria-label="Country statistics"></section>
+
+  <section class="fingerprint" aria-label="Flavor fingerprint">
+    <div class="fingerprint-copy">
+      <h2>Flavor Fingerprint</h2>
+      <p>The average taste profile of this country's dishes — sweet, salty, sour, bitter, umami, and heat, each scored out of 5. A wider shape means bolder flavor in that direction.</p>
+      <p class="fp-note" id="fingerprintNote"></p>
+    </div>
+    <div id="countryFingerprint"></div>
+  </section>
+
+  <section aria-label="Top dishes">
+    <h2 class="csection-title">Top Dishes</h2>
+    <p class="csection-sub">Globally ranked dishes first, then the rest alphabetically.</p>
+    <div class="top-dishes" id="topDishes"></div>
+  </section>
+
+  <section aria-label="All dishes">
+    <h2 class="csection-title">Every Dish</h2>
+    <p class="csection-sub" id="gridCount"></p>
+    <div class="food-grid" id="foodGrid"></div>
+  </section>
+</main>
+
+<div class="country-notfound" id="countryNotFound" hidden>
+  <h1>Country not found</h1>
+  <p id="nfQuery">We could not find that country in the encyclopedia.</p>
+  <a class="btn-gold" href="map.html">Explore the Flavor Map</a>
+</div>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="tastes.js"></script>
+<script src="dna.js"></script>
+<script src="country.js"></script>
+<script src="theme.js"></script>
+<script src="assistant.js"></script>
+<script src="cursor-glow.js"></script>
+
+<script src="collections.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
+</body>
+</html>
