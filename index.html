@@ -11,6 +11,7 @@
 <meta property="og:url" content="https://globalfoodencyclopedia.example/index.html">
 <meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="modal.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -38,6 +39,8 @@
   <a href="index.html" class="current">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="cookbook.html">Cookbook</a>
@@ -78,6 +81,14 @@
     <p>A new dish every day — same for everyone, everywhere.</p>
   </div>
   <div id="fotd-slot" style="max-width:640px;margin:24px auto 0"></div>
+</section>
+
+<section class="home-section" id="recent-section" aria-label="Recently viewed" style="display:none">
+  <div class="section-head">
+    <h2>Recently viewed</h2>
+    <p>Foods you opened recently — jump back in with one tap.</p>
+  </div>
+  <div class="chips" id="recent-strip" style="flex-wrap:wrap"></div>
 </section>
 
 <main>
@@ -125,6 +136,9 @@
 
 <script src="data/foods.js"></script>
 <script src="data/photos.js"></script>
+<script src="data/pros-cons.js"></script>
+<script src="modal.js"></script>
+<script src="recent.js"></script>
 <script src="tour.js"></script>
 <script src="theme.js"></script>
 <script src="cookbook.js"></script>
@@ -149,8 +163,12 @@
     return "";
   }
 
+  function escAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  }
+
   function cardHTML(f) {
-    return '<article class="card">'
+    return '<article class="card" data-food-name="' + escAttr(f.name) + '">'
       + '<div class="emoji">' + f.emoji + '</div>'
       + '<h3>' + f.name + '</h3>'
       + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
@@ -238,7 +256,7 @@
       var photo = (typeof PHOTOS !== "undefined" && PHOTOS[p.name])
         ? '<img class="pick-photo" src="' + PHOTOS[p.name] + '" data-photo-for="' + p.name + '" alt="' + p.name + '" loading="lazy" onerror="this.remove()">'
         : "";
-      return '<article class="card pick-card">'
+      return '<article class="card pick-card" data-food-name="' + escAttr(f.name) + '">'
         + photo
         + '<div class="pick-emoji-fallback">' + f.emoji + '</div>'
         + '<h3>' + f.name + '</h3>'
