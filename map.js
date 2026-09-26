@@ -11,6 +11,10 @@
  *    each a <span data-food-name="..."> that calls window.openFoodModal(name)
  *    when available (guarded; modal.js owns the modal itself).
  *  - Region filter buttons ("All" + the 6 regions) toggle visible markers.
+ *  - Taste filter chips (Sweet, Salty, Spicy, Umami, Creamy, Smoky, Sour,
+ *    Fresh; multi-select) narrow markers to places with a matching dish and
+ *    reorder each popup so matching dishes come first. Needs tastes.js
+ *    (window.FOOD_TASTES); the bar stays hidden if it didn't load.
  *  - If the Leaflet CDN fails, a styled fallback message is shown instead.
  */
 (function () {
@@ -285,8 +289,34 @@
     return best;
   }
 
+  /* Taste data (tastes.js). Guarded: the taste bar hides if it didn't load. */
+  var TASTES = (typeof window.FOOD_TASTES === "object" && window.FOOD_TASTES) || {};
+  var TASTE_FILTERS = [
+    ["sweet", "Sweet"], ["salty", "Salty"], ["spicy", "Spicy"], ["umami", "Umami"],
+    ["creamy", "Creamy"], ["smoky", "Smoky"], ["sour", "Sour"], ["fresh", "Fresh"]
+  ];
+
+  function tasteTagsOf(name) {
+    var t = TASTES[name];
+    return (t && t.tags) || [];
+  }
+
+  function foodMatchesTaste(food, tastes) {
+    if (!tastes.length) return true;
+    var tags = tasteTagsOf(food.name);
+    for (var i = 0; i < tastes.length; i++) {
+      if (tags.indexOf(tastes[i]) !== -1) return true;
+    }
+    return false;
+  }
+
   /* Top dishes for an origin: bestRank asc, then worstRank asc, then the rest. Max 8. */
   function topFoods(origin) {
+    return allRanked(origin).slice(0, 8);
+  }
+
+  /* Same ranking as topFoods, un-sliced, so taste filtering can reorder. */
+  function allRanked(origin) {
     var indexed = dishesOf(origin).map(function (f, i) { return { f: f, i: i }; });
     indexed.sort(function (a, b) {
       var ba = a.f.bestRank || Infinity, bb = b.f.bestRank || Infinity;
@@ -298,7 +328,16 @@
       if (wa !== wb) return wa - wb;
       return a.i - b.i;
     });
-    return indexed.slice(0, 8).map(function (x) { return x.f; });
+    return indexed.map(function (x) { return x.f; });
+  }
+
+  /* When taste filters are active, matching dishes float to the top. */
+  function rankedFoods(origin, tastes) {
+    var all = allRanked(origin);
+    if (!tastes || !tastes.length) return all.slice(0, 8);
+    var matching = all.filter(function (f) { return foodMatchesTaste(f, tastes); });
+    var rest = all.filter(function (f) { return !foodMatchesTaste(f, tastes); });
+    return matching.concat(rest).slice(0, 8);
   }
 
   function rankTag(f) {
@@ -307,13 +346,21 @@
     return "";
   }
 
-  function popupHTML(origin, count, region) {
-    var items = topFoods(origin).map(function (f) {
+  function tastePills(f) {
+    var tags = tasteTagsOf(f.name);
+    if (!tags.length) return "";
+    return '<div class="fm-ttags" aria-label="Tastes like">'
+      + tags.map(function (t) { return '<span class="fm-ttag">' + esc(t) + "</span>"; }).join("")
+      + "</div>";
+  }
+
+  function popupHTML(origin, count, region, tastes) {
+    var items = rankedFoods(origin, tastes).map(function (f) {
       return '<li><span class="fm-food" data-food-name="' + esc(f.name) + '" role="button" tabindex="0">'
-        + esc(f.emoji) + ' ' + esc(f.name) + '</span>' + rankTag(f) + '</li>';
+        + esc(f.emoji) + ' ' + esc(f.name) + '</span>' + rankTag(f) + tastePills(f) + '</li>';
     }).join("");
     return '<div class="fm-popup">'
-      + '<h4>' + esc(origin) + '</h4>'
+      + '<h4><a class="fm-country-link" href="country.html?c=' + encodeURIComponent(origin) + '">' + esc(origin) + '</a></h4>'
       + '<p class="fm-sub">' + count + ' dish' + (count === 1 ? '' : 'es') + ' · ' + esc(region || '') + '</p>'
       + '<ul>' + items + '</ul>'
       + '<p class="fm-hint">Select a dish for details</p>'
@@ -389,24 +436,49 @@
         "<strong>" + esc(origin) + "</strong> · " + count + " dish" + (count === 1 ? "" : "es"),
         { direction: "top", offset: [0, -radius], className: "fm-tooltip" }
       );
-      marker.bindPopup(popupHTML(origin, count, region), { className: "fm-popup-wrap", maxWidth: 320 });
-      return { origin: origin, region: region, count: count, marker: marker };
+      marker.bindPopup(popupHTML(origin, count, region, []), { className: "fm-popup-wrap", maxWidth: 320 });
+      return { origin: origin, region: region, count: count, dishes: dishes, marker: marker };
     });
 
     var layer = L.layerGroup().addTo(map);
 
-    var state = { region: "All" };
+    var state = { region: "All", tastes: [] };
+    function tasteLabel(t) {
+      for (var i = 0; i < TASTE_FILTERS.length; i++) {
+        if (TASTE_FILTERS[i][0] === t) return TASTE_FILTERS[i][1];
+      }
+      return t;
+    }
     function applyFilter() {
       layer.clearLayers();
       var shown = 0;
       markers.forEach(function (m) {
-        if (state.region === "All" || m.region === state.region) {
+        var regionOK = state.region === "All" || m.region === state.region;
+        var tasteOK = state.tastes.length === 0 || m.dishes.some(function (f) {
+          return foodMatchesTaste(f, state.tastes);
+        });
+        if (regionOK && tasteOK) {
+          /* Refresh the popup so taste filtering reorders its dish list. */
+          m.marker.bindPopup(
+            popupHTML(m.origin, m.count, m.region, state.tastes),
+            { className: "fm-popup-wrap", maxWidth: 320 }
+          );
           m.marker.addTo(layer);
           shown++;
         }
       });
       var status = document.getElementById("fmStatus");
-      if (status) status.textContent = "Showing " + shown + " of " + markers.length + " places";
+      if (status) {
+        var txt = "Showing " + shown + " of " + markers.length + " places";
+        if (state.tastes.length) {
+          txt += " · craving " + state.tastes.map(tasteLabel).join(", ");
+        }
+        status.textContent = txt;
+      }
+      var tcount = document.getElementById("fmTasteCount");
+      if (tcount) tcount.textContent = state.tastes.length ? "(" + state.tastes.length + ")" : "";
+      var tclear = document.getElementById("fmTasteClear");
+      if (tclear) tclear.hidden = state.tastes.length === 0;
     }
     applyFilter();
 
@@ -434,6 +506,42 @@
         });
         applyFilter();
       });
+    }
+
+    /* Taste filter chips: multi-select. Hidden entirely if tastes.js failed
+     * to load (no data to filter on). */
+    var tasteBar = document.getElementById("fmTasteBar");
+    var tasteChips = document.getElementById("fmTasteChips");
+    var hasTasteData = Object.keys(TASTES).length > 0;
+    if (tasteBar && tasteChips && hasTasteData) {
+      tasteBar.hidden = false;
+      tasteChips.innerHTML = TASTE_FILTERS.map(function (tf) {
+        return '<button type="button" class="chip" data-taste="' + esc(tf[0]) + '"'
+          + ' aria-pressed="false">' + esc(tf[1]) + "</button>";
+      }).join("");
+      tasteChips.addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest("[data-taste]") : null;
+        if (!btn) return;
+        var t = btn.getAttribute("data-taste");
+        var ix = state.tastes.indexOf(t);
+        var on = ix === -1;
+        if (on) state.tastes.push(t); else state.tastes.splice(ix, 1);
+        btn.classList.toggle("active", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        applyFilter();
+      });
+      var tclear = document.getElementById("fmTasteClear");
+      if (tclear) {
+        tclear.addEventListener("click", function () {
+          state.tastes = [];
+          var chips = tasteChips.querySelectorAll(".chip");
+          Array.prototype.forEach.call(chips, function (c) {
+            c.classList.remove("active");
+            c.setAttribute("aria-pressed", "false");
+          });
+          applyFilter();
+        });
+      }
     }
   }
 
