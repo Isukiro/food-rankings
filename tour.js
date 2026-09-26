@@ -425,7 +425,10 @@
         history.replaceState(null, '', location.pathname + location.search);
       }
     } catch (e) { /* file:// may reject replaceState; harmless */ }
-    if (isHomePage() && (viaLink || !storageGet(NOPLAY_KEY))) {
+    /* Autoplay once: only on the very first homepage visit (or an explicit
+       #tour link). After the tour is finished or skipped, it never autoplays
+       again — manual start via Help → Take the Tour always works. */
+    if (isHomePage() && (viaLink || (!storageGet(STORE_KEY) && !storageGet(NOPLAY_KEY)))) {
       setTimeout(function () { startFoodTour(); }, 600);
     }
   }
