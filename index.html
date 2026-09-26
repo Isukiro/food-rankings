@@ -12,6 +12,45 @@
 <meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="modal.css">
+<style>
+/* Homepage additions: Food of the Day countdown + search suggestions. */
+.fotd-comeback {
+  margin: 14px 0 0; font-family: Georgia, serif; font-style: italic;
+  color: var(--muted); font-size: .95rem;
+}
+.fotd-comeback #fotdCountdown { color: var(--accent); font-style: normal; font-weight: 700; }
+/* Search autocomplete wrapper + dropdown. */
+.search-input-wrap { position: relative; flex: 1; display: flex; }
+.search-input-wrap #searchInput { width: 100%; }
+.suggest-box {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 60;
+  background: var(--surface); border: 1px solid var(--card-edge);
+  border-radius: 12px; box-shadow: 0 18px 40px rgba(0,0,0,.5);
+  overflow: hidden; text-align: left; max-height: 340px; overflow-y: auto;
+}
+.suggest-box[hidden] { display: none; }
+.sug-head {
+  padding: 10px 16px 4px; font-size: .7rem; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--muted);
+}
+.sug-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  cursor: pointer; border-top: 1px solid rgba(255,255,255,.06);
+}
+.sug-item:first-child { border-top: none; }
+.sug-item:hover, .sug-item.sug-active { background: rgba(201,162,39,.12); }
+.sug-emoji { font-size: 1.25rem; flex: 0 0 auto; }
+.sug-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sug-name { font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sug-sub { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sug-tags { display: flex; gap: 4px; flex: 0 0 auto; }
+.sug-tag {
+  font-size: .64rem; line-height: 1.6; padding: 0 8px; white-space: nowrap;
+  border: 1px solid var(--card-edge); border-radius: 999px;
+  color: var(--accent); background: rgba(201,162,39,.08); text-transform: capitalize;
+}
+.sug-clock { color: var(--accent); font-size: 1rem; flex: 0 0 auto; }
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -38,36 +77,33 @@
 <nav class="site-nav" aria-label="Site navigation">
   <a href="index.html" class="current">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
 </nav>
 
-<header class="hero">
+<header class="hero hero-editorial">
   <p class="kicker">The World Food Encyclopedia</p>
-  <h1>Every Food on Earth, <span class="gold">Explained</span></h1>
-  <p class="sub">Search hundreds of dishes, snacks, desserts and drinks from every continent — with definitions, real global rankings, and the research behind them.</p>
-  <div class="search-hero">
-    <input id="searchInput" type="text" placeholder="Search any food… (try 'dumpling', 'chocolate' or 'Japan')" autocomplete="off">
-    <button id="surpriseBtn" class="gold-btn">🎲 Surprise me</button>
-  </div>
-  <div class="chip-group">
-    <span class="chip-label">Category</span>
-    <div class="chips" id="searchCatChips"></div>
-  </div>
-  <div class="chip-group">
-    <span class="chip-label">Region</span>
-    <div class="chips" id="searchRegionChips"></div>
-  </div>
-  <p class="result-count" id="searchCount"></p>
-  <div class="grid" id="searchGrid"></div>
-  <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
-  <p class="cap-note" id="searchCap" style="display:none"></p>
+  <h1>Every Food on Earth,<br><span class="gold">Beautifully Explained</span></h1>
+  <div class="hero-rule" aria-hidden="true"><span></span></div>
+  <p class="standfirst">A living encyclopedia of 1,203 dishes, snacks, desserts and drinks from every continent — a delicious start on the 50,000+ edible species researchers estimate exist. Each entry carries its definition, its real global ranking, and the research behind the rank.</p>
+  <p class="hero-cta"><a class="gold-btn hero-btn" href="#search-section">Start exploring</a></p>
 </header>
+
+<section class="home-section featured-section" aria-label="Food of the day">
+  <div class="section-head">
+    <h2>Food of the Day</h2>
+    <p>One dish, every day — the same pick for everyone, everywhere.</p>
+  </div>
+  <div id="featured-slot"></div>
+</section>
 
 <aside class="sage-callout" aria-label="Meet Sage, your AI food guide">
   <span class="sage-callout-emoji">🧑‍🍳</span>
@@ -91,12 +127,30 @@
     <p><button type='button' class='gold-btn' id='introTourBtn' style='padding:14px 34px;margin-top:10px'>Take the 60-second tour</button></p>
   </div>
 </section>
-<section class="home-section" aria-label="Food of the Day">
+<section class="home-section search-section" id="search-section" aria-label="Search the encyclopedia">
   <div class="section-head">
-    <h2>Food of the Day</h2>
-    <p>A new dish every day — same for everyone, everywhere.</p>
+    <h2>Search the Encyclopedia</h2>
+    <p>Type a craving, a country, or an ingredient — then filter by category or region.</p>
   </div>
-  <div id="fotd-slot" style="max-width:640px;margin:24px auto 0"></div>
+  <div class="search-hero">
+    <div class="search-input-wrap">
+      <input id="searchInput" type="text" placeholder="Search any food… (try 'dumpling', 'chocolate' or 'Japan')" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchSuggest" aria-autocomplete="list">
+      <div id="searchSuggest" class="suggest-box" role="listbox" aria-label="Search suggestions" hidden></div>
+    </div>
+    <button id="surpriseBtn" class="gold-btn">Surprise me</button>
+  </div>
+  <div class="chip-group">
+    <span class="chip-label">Category</span>
+    <div class="chips" id="searchCatChips"></div>
+  </div>
+  <div class="chip-group">
+    <span class="chip-label">Region</span>
+    <div class="chips" id="searchRegionChips"></div>
+  </div>
+  <p class="result-count" id="searchCount"></p>
+  <div class="grid food-grid" id="searchGrid"></div>
+  <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
+  <p class="cap-note" id="searchCap" style="display:none"></p>
 </section>
 
 <section class="home-section" id="recent-section" aria-label="Recently viewed" style="display:none">
@@ -151,8 +205,11 @@
 </footer>
 
 <script src="data/foods.js"></script>
+<script src="tastes.js"></script>
+<script src="surprise.js"></script>
 <script src="data/photos.js"></script>
 <script src="data/pros-cons.js"></script>
+<script src="food-details.js"></script>
 <script src="modal.js"></script>
 <script src="recent.js"></script>
 <script src="tour.js"></script>
@@ -161,6 +218,7 @@
 <script src="fotd.js"></script>
 <script src="assistant.js"></script>
 <script src="cursor-glow.js"></script>
+<script src="search-plus.js"></script>
 <script>
 /* Homepage: food search engine + trending previews + editor's picks + latest reviews. */
 (function () {
@@ -183,15 +241,34 @@
     return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
   }
 
+  function photoURLFor(f) {
+    var det = (window.FOOD_DETAILS || {})[f.name];
+    if (det && det.photo) return det.photo;
+    if (typeof PHOTOS !== "undefined" && PHOTOS[f.name]) return PHOTOS[f.name];
+    return "";
+  }
+
+  function mediaHTML(f) {
+    var url = photoURLFor(f);
+    var img = url
+      ? '<img class="food-card-photo" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy" onerror="this.remove()">'
+      : "";
+    return '<div class="food-card-media"><div class="emoji-tile" aria-hidden="true">' + f.emoji + '</div>' + img + '</div>';
+  }
+
+  function catTagHTML(f) {
+    return '<span class="cat-tag"><span class="cat-emoji" aria-hidden="true">' + f.emoji + '</span>' + f.category + '</span>';
+  }
+
   function cardHTML(f) {
-    return '<article class="card" data-food-name="' + escAttr(f.name) + '">'
-      + '<div class="emoji">' + f.emoji + '</div>'
+    return '<article class="card food-card" data-food-name="' + escAttr(f.name) + '">'
+      + mediaHTML(f)
+      + '<div class="food-card-body">'
       + '<h3>' + f.name + '</h3>'
       + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
-      + '<div class="cat-row"><span class="cat-tag">' + f.category + '</span>' + rankBadge(f) + '</div>'
-      + '<p class="definition">' + f.definition + '</p>'
-      + '<div class="research"><strong>Research:</strong> ' + f.research + '</div>'
-      + '</article>';
+      + '<div class="cat-row">' + catTagHTML(f) + rankBadge(f) + '</div>'
+      + '<p class="food-card-def">' + f.definition + '</p>'
+      + '</div></article>';
   }
 
   function matchesFilters(f) {
@@ -269,17 +346,15 @@
     el.innerHTML = PICKS.map(function (p) {
       var f = FOODS.find(function (x) { return x.name === p.name; });
       if (!f) return "";
-      var photo = (typeof PHOTOS !== "undefined" && PHOTOS[p.name])
-        ? '<img class="pick-photo" src="' + PHOTOS[p.name] + '" data-photo-for="' + p.name + '" alt="' + p.name + '" loading="lazy" onerror="this.remove()">'
-        : "";
-      return '<article class="card pick-card" data-food-name="' + escAttr(f.name) + '">'
-        + photo
-        + '<div class="pick-emoji-fallback">' + f.emoji + '</div>'
+      return '<article class="card food-card pick-card" data-food-name="' + escAttr(f.name) + '">'
+        + mediaHTML(f)
+        + '<div class="food-card-body">'
+        + '<span class="pick-kicker">Editor\u2019s pick</span>'
         + '<h3>' + f.name + '</h3>'
         + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
-        + '<div class="cat-row"><span class="cat-tag">' + f.category + '</span>' + rankBadge(f) + '</div>'
-        + '<div class="pick-review"><span class="pick-kicker">Editor\u2019s pick</span>' + p.review + '</div>'
-        + '</article>';
+        + '<div class="cat-row">' + catTagHTML(f) + rankBadge(f) + '</div>'
+        + '<p class="pick-review">' + p.review + '</p>'
+        + '</div></article>';
     }).join("");
   }
 
@@ -298,14 +373,66 @@
     var el = document.getElementById("reviewsGrid");
     el.innerHTML = REVIEWS.map(function (r) {
       var f = FOODS.find(function (x) { return x.name === r.food; });
-      var foodLine = f ? (f.emoji + " " + f.name + " — " + f.origin) : r.food;
+      var media = f ? mediaHTML(f) : "";
+      var foodLine = f
+        ? ('<a class="review-food-link" href="food.html?name=' + encodeURIComponent(f.name) + '">' + f.emoji + ' ' + f.name + '</a> — ' + f.origin)
+        : r.food;
       var stars = "\u2605".repeat(r.stars) + "\u2606".repeat(5 - r.stars);
-      return '<article class="card review-card">'
+      return '<article class="card food-card review-card">'
+        + media
+        + '<div class="food-card-body">'
         + '<h3 class="review-title">' + r.title + '</h3>'
         + '<div class="review-meta">' + foodLine + ' · <span class="stars">' + stars + '</span> · ' + r.date + '</div>'
         + '<div class="review-body"><p>' + r.body + '</p></div>'
-        + '</article>';
+        + '</div></article>';
     }).join("");
+  }
+
+  /* Featured Dish — mirrors the deterministic Food of the Day pick from
+   * fotd.js (days since 2026-01-01 UTC, mod FOODS.length) so both agree. */
+  function renderFeatured() {
+    var slot = document.getElementById("featured-slot");
+    if (!slot || typeof FOODS === "undefined" || !FOODS.length) return;
+    var epoch = Date.UTC(2026, 0, 1);
+    var days = Math.floor((Date.now() - epoch) / 86400000);
+    var f = FOODS[((days % FOODS.length) + FOODS.length) % FOODS.length];
+    if (!f) return;
+    var weekday = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    var url = photoURLFor(f);
+    var photo = url
+      ? '<img class="featured-photo" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy" onerror="this.remove()">'
+      : "";
+    slot.innerHTML =
+      '<article class="featured-spread">'
+      + '<div class="featured-media"><div class="emoji-tile" aria-hidden="true">' + f.emoji + '</div>' + photo + '</div>'
+      + '<div class="featured-body">'
+      + '<p class="kicker">Food of the Day · ' + weekday + '</p>'
+      + '<h2>' + f.name + '</h2>'
+      + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
+      + '<div class="cat-row">' + catTagHTML(f) + rankBadge(f) + '</div>'
+      + '<p class="featured-note">' + f.definition + '</p>'
+      + '<p class="featured-research"><strong>Why it matters —</strong> ' + f.research + '</p>'
+      + '<p class="fotd-comeback">A new dish every day — come back tomorrow. Next dish in <span id="fotdCountdown">…</span></p>'
+      + '<p class="featured-cta"><a class="gold-btn featured-btn" href="food.html?name=' + encodeURIComponent(f.name) + '">Read the full story</a></p>'
+      + '</div></article>';
+    startFotdCountdown();
+  }
+
+  /* Live countdown to local midnight — a reason to come back tomorrow. */
+  function startFotdCountdown() {
+    if (window.__fotdTimer) return;
+    var tick = function () {
+      var el = document.getElementById("fotdCountdown");
+      if (!el) return;
+      var now = new Date();
+      var midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      var s = Math.max(0, Math.floor((midnight - now) / 1000));
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      el.textContent = h + "h " + m + "m";
+    };
+    tick();
+    window.__fotdTimer = setInterval(tick, 1000);
   }
 
   // init
@@ -318,6 +445,7 @@
     renderSearch();
   });
   document.getElementById("surpriseBtn").addEventListener("click", function () {
+    if (typeof window.openSurprise === "function") { window.openSurprise(); return; }
     var f = FOODS[Math.floor(Math.random() * FOODS.length)];
     state.q = ""; state.cat = "All"; state.region = "All";
     document.getElementById("searchInput").value = "";
@@ -326,11 +454,12 @@
     });
     document.getElementById("searchGrid").innerHTML = cardHTML(f);
     document.getElementById("searchEmpty").style.display = "none";
-    document.getElementById("searchCount").textContent = "🎲 A surprise for you: " + f.name;
+    document.getElementById("searchCount").textContent = "A surprise for you: " + f.name;
     document.getElementById("searchCap").style.display = "none";
     document.getElementById("searchGrid").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   renderSearch();
+  renderFeatured();
   var best10 = FOODS.filter(function (f) { return f.bestRank && f.bestRank <= 10; })
     .sort(function (a, b) { return a.bestRank - b.bestRank; });
   var worst10 = FOODS.filter(function (f) { return f.worstRank && f.worstRank <= 10; })
@@ -348,5 +477,8 @@
   }
 })();
 </script>
+<script src="collections.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
 </body>
 </html>
