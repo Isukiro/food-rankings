@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse by Category &amp; Region | The Global Food Encyclopedia</title>
+<meta name="description" content="Browse hundreds of dishes by category — mains, soups, street food, desserts and more — or by region, from Europe to Oceania. Every card leads to the full ranked leaderboard.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Browse by Category &amp; Region | The Global Food Encyclopedia">
+<meta property="og:description" content="Browse hundreds of dishes by category or region — every card leads to the full ranked leaderboard.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/categories.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Food Categories",
+  "description": "The ten food categories of The Global Food Encyclopedia.",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Main"},
+    {"@type": "ListItem", "position": 2, "name": "Soup"},
+    {"@type": "ListItem", "position": 3, "name": "Street Food"},
+    {"@type": "ListItem", "position": 4, "name": "Snack"},
+    {"@type": "ListItem", "position": 5, "name": "Dessert"},
+    {"@type": "ListItem", "position": 6, "name": "Candy"},
+    {"@type": "ListItem", "position": 7, "name": "Breakfast"},
+    {"@type": "ListItem", "position": 8, "name": "Drink"},
+    {"@type": "ListItem", "position": 9, "name": "Side"},
+    {"@type": "ListItem", "position": 10, "name": "Seafood"}
+  ]
+}
+</script>
+
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html" class="current">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a>
+</nav>
+
+<header class="hero">
+  <p class="kicker">Browse the Encyclopedia</p>
+  <h1>Categories <span class="gold">&amp;</span> Regions</h1>
+  <p class="sub">Ten categories, six regions, hundreds of dishes. Pick a card to jump straight into the ranked leaderboard, pre-filtered for you.</p>
+</header>
+
+<main>
+  <section aria-label="Food categories">
+    <div class="section-head">
+      <h2>Categories</h2>
+      <p>From hearty mains to tiny candies — every dish has a home.</p>
+    </div>
+    <div class="cat-grid" id="categoryGrid"></div>
+  </section>
+
+  <section aria-label="Food regions">
+    <div class="section-head">
+      <h2>Regions</h2>
+      <p>Six regions, one planet of flavor.</p>
+    </div>
+    <div class="cat-grid" id="regionGrid"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script>
+/* Category hub: counts + top dishes computed live from FOODS. */
+(function () {
+  'use strict';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  var CAT_META = [
+    ['Main', '🍽️'], ['Soup', '🍲'], ['Street Food', '🥙'], ['Snack', '🍿'],
+    ['Dessert', '🍨'], ['Candy', '🍬'], ['Breakfast', '🍳'], ['Drink', '🥤'],
+    ['Side', '🥗'], ['Seafood', '🦐']
+  ];
+  var REGION_META = [
+    ['Europe', '🏛️'], ['Asia', '🏮'], ['Middle East', '🕌'],
+    ['Africa', '🌍'], ['Americas', '🗽'], ['Oceania', '🏝️']
+  ];
+
+  function topDish(items) {
+    var best = null;
+    for (var i = 0; i < items.length; i++) {
+      var r = items[i].bestRank;
+      if (r != null && (best === null || r < best.bestRank)) best = items[i];
+    }
+    return best;
+  }
+
+  function card(name, emoji, count, top, href) {
+    var topLine = top
+      ? 'Top dish: <strong>' + esc(top.name) + '</strong> (#' + top.bestRank + ')'
+      : 'No ranked dishes yet';
+    return '<a class="cat-card" href="' + esc(href) + '">' +
+      '<span class="cat-emoji" aria-hidden="true">' + emoji + '</span>' +
+      '<h3>' + esc(name) + '</h3>' +
+      '<p class="cat-count">' + count + (count === 1 ? ' dish' : ' dishes') + '</p>' +
+      '<p class="cat-top">' + topLine + '</p></a>';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var catGrid = document.getElementById('categoryGrid');
+    var regGrid = document.getElementById('regionGrid');
+    if (typeof FOODS === 'undefined') {
+      var msg = '<div class="empty">Category data failed to load. Please refresh the page.</div>';
+      catGrid.innerHTML = msg;
+      regGrid.innerHTML = '';
+      return;
+    }
+    catGrid.innerHTML = CAT_META.map(function (m) {
+      var items = FOODS.filter(function (f) { return f.category === m[0]; });
+      return card(m[0], m[1], items.length, topDish(items),
+        'rankings.html?tab=best&category=' + encodeURIComponent(m[0]));
+    }).join('');
+    regGrid.innerHTML = REGION_META.map(function (m) {
+      var items = FOODS.filter(function (f) { return f.region === m[0]; });
+      return card(m[0], m[1], items.length, topDish(items),
+        'rankings.html?tab=best&region=' + encodeURIComponent(m[0]));
+    }).join('');
+  });
+})();
+</script>
+</body>
+</html>
