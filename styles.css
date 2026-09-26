@@ -616,6 +616,27 @@ background:var(--primary);color:#1a1405;font-size:1rem}
 #sage-panel{right:12px;left:12px;bottom:12px;top:12px;width:auto;height:auto;max-height:none}
 #sage-fab{right:16px;bottom:16px}
 }
+/* First-visit nudge: pulsing fab + speech bubble so visitors find Sage. */
+#sage-fab.sage-nudge{animation:sage-nudge-pulse 1.6s ease-in-out infinite;border-color:var(--accent)}
+@keyframes sage-nudge-pulse{0%,100%{box-shadow:0 10px 28px rgba(0,0,0,.45),0 0 0 0 rgba(212,175,55,.55)}50%{box-shadow:0 10px 28px rgba(0,0,0,.45),0 0 0 14px rgba(212,175,55,0)}}
+#sage-tip{position:fixed;right:92px;bottom:34px;z-index:401;max-width:250px;
+background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px 14px;
+color:var(--text);font-size:.85rem;line-height:1.45;cursor:pointer;
+box-shadow:0 12px 30px rgba(0,0,0,.5);animation:sage-tip-in .35s ease}
+#sage-tip strong{color:var(--accent)}
+@keyframes sage-tip-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:520px){#sage-tip{right:86px;bottom:28px;max-width:210px}}
+/* Homepage Sage callout card. */
+.sage-callout{max-width:860px;margin:26px auto 0;padding:18px 22px;display:flex;align-items:center;gap:16px;
+background:var(--surface);border:1px solid var(--card-edge);border-radius:14px;
+box-shadow:0 10px 28px rgba(0,0,0,.35);text-align:left}
+.sage-callout-emoji{font-size:2.4rem;flex:none}
+.sage-callout div{flex:1;color:var(--text-soft);font-size:.95rem;line-height:1.55}
+.sage-callout strong{color:var(--text);font-family:Georgia,serif;font-size:1.05rem}
+.sage-callout button{flex:none;background:var(--primary);color:#1a1405;border:0;border-radius:999px;
+padding:11px 22px;font-size:.92rem;font-weight:700;cursor:pointer;font-family:inherit}
+.sage-callout button:hover{background:var(--accent)}
+@media (max-width:560px){.sage-callout{flex-wrap:wrap}.sage-callout button{width:100%}}
 
 /* ================= Neon cursor ================= */
 #cursor-glow{position:fixed;top:0;left:0;width:40px;height:40px;margin:-20px 0 0 -20px;
