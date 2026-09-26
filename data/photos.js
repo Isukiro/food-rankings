@@ -15,3 +15,6 @@ const PHOTOS = {
   "Thorramatur": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Thorramatur.jpg/960px-Thorramatur.jpg",
   "Truchas a la Navarra": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Trucha_a_la_Navarra.jpg/960px-Trucha_a_la_Navarra.jpg"
 };
+
+/* Expose on window: const at top level does not attach to window. */
+window.PHOTOS = PHOTOS;
