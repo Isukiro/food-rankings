@@ -157,6 +157,9 @@
     var close = document.getElementById("regionClose");
     if (close) close.addEventListener("click", function () {
       panel.hidden = true;
+      if (window.__frMap && typeof window.__frMap.clearYouAreHere === "function") {
+        try { window.__frMap.clearYouAreHere(); } catch (e) { /* noop */ }
+      }
       var cards = document.querySelectorAll("#regionCards .region-card");
       Array.prototype.forEach.call(cards, function (c) {
         c.classList.remove("active");
@@ -177,6 +180,10 @@
     renderPanel(region);
     if (window.__frMap && typeof window.__frMap.flyTo === "function") {
       try { window.__frMap.flyTo([meta.lat, meta.lng], meta.zoom, { duration: 1.6 }); } catch (e) { /* noop */ }
+    }
+    /* Drop the "you are here" pin at the region's center. */
+    if (window.__frMap && typeof window.__frMap.youAreHere === "function") {
+      try { window.__frMap.youAreHere(meta.lat, meta.lng, "You are here · " + region); } catch (e) { /* noop */ }
     }
     /* Sync the map's own region filter chips so the markers match. */
     var chips = document.querySelectorAll("#fmFilters [data-region]");
