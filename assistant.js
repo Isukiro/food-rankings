@@ -80,8 +80,87 @@
     'burger': 'Cheeseburger',
     'curry': 'Phanaeng Curry',
     'kimchi': 'Kimchi',
-    'dumpling': 'Xiaolongbao'
+    'dumpling': 'Xiaolongbao',
+    'pad thai': 'Pad Thai',
+    'bibimbap': 'Bibimbap',
+    'croissant': 'Croissant',
+    'falafel': 'Falafel',
+    'lasagna': 'Lasagne alla Bolognese',
+    'lasagne': 'Lasagne alla Bolognese',
+    'paella': 'Paella',
+    'miso soup': 'Miso Soup',
+    'miso': 'Miso Soup',
+    'tom yum': 'Tom Yum Goong',
+    'banh mi': 'Banh Mi',
+    'gyoza': 'Gyoza',
+    'tiramisu': 'Tiramisu',
+    'baklava': 'Baklava',
+    'churros': 'Churros',
+    'hummus': 'Hummus',
+    'shawarma': 'Shawarma',
+    'poutine': 'Poutine',
+    'arepas': 'Arepas',
+    'satay': 'Satay',
+    'samosa': 'Samosa',
+    'empanada': 'Empanada',
+    'currywurst': 'Currywurst'
   };
+
+  /* Damerau-Levenshtein distance (optimal string alignment): like Levenshtein
+   * but an adjacent transposition ("ramne"→"ramen") costs 1, not 2 — the
+   * most common real-world typo. */
+  function lev(a, b) {
+    if (a === b) return 0;
+    var la = a.length, lb = b.length;
+    if (!la) return lb;
+    if (!lb) return la;
+    var prevPrev = [], prev = [], cur = [], i, j;
+    for (i = 0; i <= lb; i++) prev[i] = i;
+    for (i = 1; i <= la; i++) {
+      cur[0] = i;
+      for (j = 1; j <= lb; j++) {
+        var cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          cur[j] = Math.min(cur[j], prevPrev[j - 2] + 1);
+        }
+      }
+      var tmp = prevPrev; prevPrev = prev; prev = cur; cur = tmp;
+    }
+    return prev[lb];
+  }
+
+  /* Typo fallback: best match by Damerau-Levenshtein distance over each name
+   * word, so "piza" → pizza, "ramne" → ramen. Ties prefer officially ranked
+   * dishes (usually what the user means), then longer shared prefix. */
+  function typoMatch(q) {
+    if (q.length < 3) return null;
+    function keyOf(d, f, w) {
+      var cp = 0;
+      while (cp < q.length && cp < w.length && q[cp] === w[cp]) cp++;
+      return [d, f.bestRank ? 0 : 1, -cp, f.name.length];
+    }
+    function isBetter(k, bk) {
+      if (!bk) return true;
+      for (var i = 0; i < k.length; i++) {
+        if (k[i] !== bk[i]) return k[i] < bk[i];
+      }
+      return false;
+    }
+    var best = null, bestKey = null;
+    foods().forEach(function (f) {
+      var words = norm(f.name).split(' ');
+      words.forEach(function (w) {
+        if (w.length < 3) return;
+        var d = lev(q, w);
+        var limit = w.length <= 6 ? 2 : 3;
+        if (d > limit) return;
+        var k = keyOf(d, f, w);
+        if (isBetter(k, bestKey)) { bestKey = k; best = f; }
+      });
+    });
+    return best;
+  }
 
   function byName(name) {
     var n = norm(name);
@@ -123,8 +202,106 @@
       });
       return incl[0];
     }
+    /* Typo tolerance: "piza" → pizza, "ramne" → ramen. */
+    return typoMatch(q);
+  }
+
+  /* ------------------------------ conversational memory ------------------------------ */
+  /* lastDish: the dish the current conversation centers on ("it" in follow-ups).
+   * lastTopic: what we last talked about (lookup, rank, flavor, compare, ...). */
+
+  var lastDish = null;
+  var lastTopic = null;
+
+  function setContext(f, topic) {
+    lastDish = f || null;
+    lastTopic = topic || null;
+  }
+  function resetMemory() { lastDish = null; lastTopic = null; }
+
+  /* ------------------------------ taste helpers ------------------------------ */
+
+  function tastesFor(f) {
+    if (typeof FOOD_TASTES !== 'undefined' && FOOD_TASTES && f) return FOOD_TASTES[f.name] || null;
     return null;
   }
+
+  var MOODS = ['spicy', 'sweet', 'crunchy', 'creamy', 'umami', 'smoky', 'sour', 'fresh'];
+
+  /* Old regex pools, kept as a fallback when tastes.js isn't loaded. */
+  var MOOD_RE = {
+    spicy: /chil[il]|spicy|pepper|jalape|habanero|sriracha|sambal|wasabi|hot sauce|curry/i,
+    sweet: /sweet|sugar|chocolate|honey|caramel|dessert/i,
+    crunchy: /crisp|crunch|crackl|fried|crust/i,
+    creamy: /creamy|cream|butter|velvet/i,
+    umami: /umami|savory|meaty/i,
+    smoky: /smok|char|grill/i,
+    sour: /sour|tangy|tart|pickl/i,
+    fresh: /fresh|herb|citrus|bright/i
+  };
+  var MOOD_CATS = { sweet: ['Dessert', 'Candy'] };
+
+  function moodMatch(f, mood) {
+    var t = tastesFor(f);
+    if (t) {
+      var tags = t.tags || [];
+      if (mood === 'spicy') return tags.indexOf('spicy') !== -1 || (t.heat || 0) >= 3;
+      return tags.indexOf(mood) !== -1;
+    }
+    var hay = f.definition + ' ' + f.research;
+    var re = MOOD_RE[mood];
+    return (re && re.test(hay)) || (MOOD_CATS[mood] && MOOD_CATS[mood].indexOf(f.category) !== -1);
+  }
+
+  function heatWords(heat) {
+    if (heat >= 4) return 'fiery';
+    if (heat === 3) return 'a solid kick of heat';
+    if (heat === 2) return 'a gentle warmth';
+    if (heat === 1) return 'barely a whisper of heat';
+    return 'no heat at all';
+  }
+
+  function flavorPillsHTML(f) {
+    var t = tastesFor(f);
+    if (!t || !t.tags || !t.tags.length) return '';
+    var pills = t.tags.slice(0, 4).map(function (tag) {
+      return '<span class="sage-pill">' + esc(tag) + '</span>';
+    }).join('');
+    return '<div class="sage-flavors"><span class="sage-flavor-label">Flavors</span>' + pills + '</div>';
+  }
+
+  function flavorLineHTML(f) {
+    var t = tastesFor(f);
+    if (!t) return '';
+    var bits = [];
+    var dims = [['sweet', 'sweetness'], ['salty', 'saltiness'], ['sour', 'sourness'], ['bitter', 'bitterness'], ['umami', 'umami depth']];
+    dims.forEach(function (pair) {
+      var v = t[pair[0]] || 0;
+      if (v >= 3) bits.push('pronounced ' + pair[1] + ' (' + v + '/5)');
+    });
+    bits.push(heatWords(t.heat || 0));
+    if (t.tags && t.tags.length) bits.push('notes of ' + t.tags.slice(0, 3).join(', '));
+    return bits.join('; ');
+  }
+
+  /* Personality: small variant pools, picked at random. */
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  var GREETINGS = [
+    'Hey there! I\u2019m <strong>Sage</strong> 🧑‍🍳, your food guide. Ask me about any dish, who\u2019s topping the rankings, or how this whole site works.',
+    'Hello! <strong>Sage</strong> 🧑‍🍳 here — I know all 1,203 foods in this encyclopedia. What are you craving to learn about?',
+    'Hey! I\u2019m <strong>Sage</strong> 🧑‍🍳. Ask me about a dish, the rankings, flavors, or how the site works.'
+  ];
+  var FALLBACKS = [
+    'Hmm, I didn\u2019t quite catch that. I\u2019m best with food questions — try one of these:',
+    'That one sailed past me! I shine brightest on food questions — how about one of these?',
+    'Not sure I followed. Point me at a dish, a craving, or a country and I\u2019ll take it from there:'
+  ];
+  var RECO_INTROS = [
+    'If I had to feed you right now, I\u2019d go with:',
+    'Alright, consulting my taste buds… here\u2019s what I\u2019d serve you:',
+    'Say no more — dinner is decided:'
+  ];
 
   function foodCardHTML(f) {
     var s = scoreOf(f);
@@ -133,15 +310,18 @@
       + '<div><div class="sage-foodname">' + esc(f.name) + '</div>'
       + '<div class="sage-foodmeta">' + esc(f.origin) + ' · ' + esc(f.region) + ' · ' + esc(f.category) + '</div></div></div>'
       + '<p class="sage-def">' + esc(f.definition) + '</p>'
+      + flavorPillsHTML(f)
       + '<div class="sage-rankline">' + esc(rankBadge(f)) + (s !== null ? ' <span class="sage-stars">' + starsOf(s) + '</span>' : '') + '</div>'
       + '<p class="sage-research"><strong>Why:</strong> ' + esc(f.research) + '</p>'
+      + '<p class="sage-links"><a href="food.html?name=' + encodeURIComponent(f.name) + '">Full page →</a>'
+      + ' · <a href="map.html" title="See it on the Flavor Map">See on the Flavor Map →</a></p>'
       + '</div>';
   }
 
   /* ------------------------------ intent engine ------------------------------ */
   /* answerFor(text) -> { html, chips } — pure, DOM-free, unit-testable. */
 
-  var OPEN_CHIPS = ['Tell me about tacos', 'Best desserts?', 'Compare ramen vs pho', 'How are foods scored?'];
+  var OPEN_CHIPS = ['Tell me about tacos', 'Best desserts?', 'Compare ramen vs pho', 'Surprise me'];
 
   var CATEGORIES = ['Main', 'Soup', 'Street Food', 'Snack', 'Dessert', 'Candy', 'Breakfast', 'Drink', 'Side', 'Seafood'];
   var REGIONS = ['Europe', 'Asia', 'Middle East', 'Africa', 'Americas', 'Oceania'];
@@ -173,17 +353,21 @@
   }
 
   function intentGreeting(tl) {
-    return { html: '<p>Hey there! I\u2019m <strong>Sage</strong> 🧑‍🍳, your food guide. Ask me about any dish, who\u2019s topping the rankings, or how this whole site works.</p>', chips: OPEN_CHIPS };
+    return { html: '<p>' + pick(GREETINGS) + '</p>', chips: OPEN_CHIPS };
   }
 
   function intentHelp() {
     return {
       html: '<p>Here\u2019s what I can do:</p><ul class="sage-list">'
         + '<li>🔍 <strong>Food facts</strong> — “tell me about kimchi”, “what is hákarl?”</li>'
+        + '<li>🌶️ <strong>Flavors</strong> — “what does pho taste like?”, “show me umami foods”, “is picanha spicy?”</li>'
         + '<li>🏆 <strong>Rankings</strong> — “best desserts”, “top 5 snacks”, “worst soups”</li>'
         + '<li>⚖️ <strong>Compare</strong> — “compare ramen vs pho”, “pizza or tacos?”</li>'
         + '<li>🤔 <strong>Why ranked?</strong> — “why is lechona ranked #1?”</li>'
-        + '<li>🍽️ <strong>Recommendations</strong> — “recommend something spicy”, “I\u2019m hungry”</li>'
+        + '<li>🍽️ <strong>Recommendations</strong> — “recommend something spicy”, “I\u2019m hungry”, “surprise me”</li>'
+        + '<li>🗣️ <strong>Pronunciation</strong> — “how do you pronounce pho?”</li>'
+        + '<li>🌍 <strong>Countries</strong> — “food from Japan”, “what\u2019s good in Italy?”</li>'
+        + '<li>📚 <strong>Your shelf</strong> — “what\u2019s on my shelf?”, “have I tried ramen?”</li>'
         + '<li>📏 <strong>Methodology</strong> — “how are foods scored?”, “what do tiers mean?”</li>'
         + '<li>🧭 <strong>Site help</strong> — voting, comparing, themes, cookbook, submitting a pick</li>'
         + '</ul>',
@@ -198,14 +382,14 @@
     if (/\bcompar/.test(tl)) {
       return { html: '<p>To compare foods: on the <strong>Rankings</strong> page, tick the compare boxes on up to 3 dishes, then hit <strong>Compare</strong> for a side-by-side table of origin, score, tier, and pros &amp; cons. Or just ask me — try “compare ramen vs pho”.</p>', chips: ['Compare ramen vs pho', 'Pizza or tacos?'] };
     }
-    if (/\b(tour|tutorial|how (does|do).*(work|site)|guide me)\b/.test(tl)) {
-      return { html: '<p>The guided tour walks you through search, rankings, filters, voting and comparing in about 60 seconds. Click <strong>“Take the tour”</strong> in the nav bar (or the button on the homepage) any time to replay it.</p>', chips: ['What can you do?', 'Tell me about tacos'] };
+    if (/\b(tour|tutorial|guide me)\b/.test(tl) || /\bhow (does|do).*(work|site)\b/.test(tl)) {
+      return { html: '<p>The guided tour walks you through search, rankings, filters, voting and comparing in about 60 seconds. Click <strong>“Take the Tour”</strong> under the nav bar\u2019s <strong>Help</strong> menu (or the button on the homepage) any time to replay it.</p>', chips: ['What can you do?', 'Tell me about tacos'] };
     }
     if (/\b(theme|color|colour|dark mode|light mode|customiz)\b/.test(tl)) {
-      return { html: '<p>Click the <strong>⚙️</strong> button in the nav bar to restyle the whole site — Ocean Blue, Forest Green, Royal Plum, Crimson Night, a light Parchment theme, or your own custom colors. Your choice is remembered.</p>', chips: ['What can you do?'] };
+      return { html: '<p>Click the <strong>⚙ Customize</strong> button in the nav bar to restyle the whole site — Ocean Blue, Forest Green, Royal Plum, Crimson Night, a light Parchment theme, or your own custom colors. It also holds the neon cursor toggle and a reset-to-default. Your choice is remembered.</p>', chips: ['What can you do?'] };
     }
     if (/\b(cookbook|bookmark|save|favour|favorite|heart)\b/.test(tl)) {
-      return { html: '<p>Tap the <strong>🤍 heart</strong> on any food card to save it to your <strong>Cookbook</strong> page — your personal shortlist, kept in this browser.</p>', chips: ['Recommend something sweet', 'Best snacks?'] };
+      return { html: '<p>Tap the <strong>🤍 heart</strong> on any food card to save it to your <strong>Cookbook</strong> page — your personal shortlist, kept in this browser. (Separately, <strong>My Shelf</strong> tracks your ♥ Favorites, ★ Want to Try, ✓ Tried It, and your own star ratings.)</p>', chips: ['What\u2019s on my shelf?', 'Recommend something sweet'] };
     }
     if (/\b(submit|suggest.*(pick|food|dish)|add.*food|contact)\b/.test(tl)) {
       return { html: '<p>Know a dish that deserves ranking? Head to the <strong>Contact</strong> page and use the <strong>Submit a Pick</strong> form — your suggestion goes straight to the editor.</p>', chips: ['What can you do?'] };
@@ -288,19 +472,8 @@
     var db = needsDB(); if (db) return db;
     var f = findFood(m[1].replace(/[#?]$/, '').trim());
     if (!f) return { html: '<p>Hmm, I couldn\u2019t find a dish matching “' + esc(m[1]) + '”. Check the spelling or try the search bar on the homepage.</p>', chips: OPEN_CHIPS };
-    var s = scoreOf(f);
-    if (f.bestRank || f.worstRank) {
-      return {
-        html: '<p><strong>' + esc(f.name) + '</strong> sits at <strong>' + esc(rankBadge(f)) + '</strong>.</p>'
-          + '<p>' + esc(f.research) + '</p>',
-        chips: ['Tell me about ' + f.name, 'Best ' + f.category.toLowerCase() + '?']
-      };
-    }
-    return {
-      html: '<p><strong>' + esc(f.name) + '</strong> isn\u2019t on the official ranked lists, so it has no rank to explain — but here\u2019s the story:</p>'
-        + '<p>' + esc(f.research) + '</p>',
-      chips: ['Best ' + f.category.toLowerCase() + '?', 'Recommend something ' + (f.category === 'Dessert' || f.category === 'Candy' ? 'sweet' : 'similar')]
-    };
+    setContext(f, 'rank');
+    return whyRankedHTML(f);
   }
 
   function verdictLine(a, b) {
@@ -356,51 +529,281 @@
     if (norm(a.name) === norm(b.name)) {
       return { html: '<p>That\u2019s the same dish twice — ' + a.emoji + ' <strong>' + esc(a.name) + '</strong> vs itself. It wins by default. 🏆</p>', chips: ['Compare ramen vs pho'] };
     }
+    setContext(null, 'compare');
     return { html: '<p>Head to head:</p>' + compareHTML(a, b), chips: ['Why is ' + a.name.toLowerCase() + ' ranked?', 'Recommend something'] };
   }
 
-  var TASTE_POOLS = {
-    spicy: { label: 'spicy', re: /chil[il]|spicy|pepper|jalape|habanero|sriracha|sambal|wasabi|hot sauce|curry/i },
-    sweet: { label: 'sweet', re: /sweet|sugar|chocolate|honey|caramel|dessert/i, cats: ['Dessert', 'Candy'] },
-    crunchy: { label: 'crunchy', re: /crisp|crunch|crackl|fried|crust/i }
-  };
+  function moodChips(mood, firstName) {
+    var chips = [];
+    if (firstName) chips.push('Tell me about ' + firstName.toLowerCase());
+    var others = MOODS.filter(function (m) { return m !== mood; });
+    chips.push('Something ' + others[Math.floor(Math.random() * others.length)]);
+    chips.push('Surprise me');
+    return chips.slice(0, 3);
+  }
 
   function intentRecommend(tl) {
     var db = needsDB(); if (db) return db;
-    var taste = null;
-    Object.keys(TASTE_POOLS).forEach(function (k) {
-      if (new RegExp('\\b' + k + '\\b').test(tl)) taste = k;
+    var mood = null;
+    MOODS.forEach(function (m) {
+      if (new RegExp('\\b' + m + '\\b').test(tl)) mood = m;
     });
     var list = foods();
     var picks;
-    if (taste) {
-      var pool = TASTE_POOLS[taste];
-      picks = list.filter(function (f) {
-        var hay = f.definition + ' ' + f.research;
-        return pool.re.test(hay) || (pool.cats && pool.cats.indexOf(f.category) !== -1);
-      });
+    if (mood) {
+      picks = list.filter(function (f) { return moodMatch(f, mood); });
       picks.sort(function (a, b) { return (a.bestRank || 999) - (b.bestRank || 999); });
       picks = picks.slice(0, 3);
-      if (!picks.length) return { html: '<p>Nothing in the database screams “' + taste + '” yet — try “recommend something sweet” or “I\u2019m hungry”.</p>', chips: ['Recommend something sweet', 'I\u2019m hungry'] };
+      if (!picks.length) return { html: '<p>Nothing in the database screams \u201c' + mood + '\u201d yet — try \u201csomething sweet\u201d or \u201cI\u2019m hungry\u201d.</p>', chips: ['Something sweet', 'I\u2019m hungry'] };
       return {
-        html: '<p>Something <strong>' + taste + '</strong>, coming right up:</p><ul class="sage-list">'
+        html: '<p>Something <strong>' + mood + '</strong>, coming right up:</p><ul class="sage-list">'
           + picks.map(function (f) {
             var s = scoreOf(f);
-            return '<li>' + f.emoji + ' <strong>' + esc(f.name) + '</strong> <span class="sage-dim">(' + esc(f.origin) + (s !== null ? ' · ' + s.toFixed(1) + '/10' : '') + ')</span><br><span class="sage-dim">' + esc(f.definition) + '</span></li>';
+            var t = tastesFor(f);
+            var tagNote = t && t.tags && t.tags.length ? ' <span class="sage-dim">[' + t.tags.slice(0, 3).join(', ') + ']</span>' : '';
+            return '<li>' + f.emoji + ' <strong>' + esc(f.name) + '</strong> <span class="sage-dim">(' + esc(f.origin) + (s !== null ? ' · ' + s.toFixed(1) + '/10' : '') + ')</span>' + tagNote + '<br><span class="sage-dim">' + esc(f.definition) + '</span></li>';
           }).join('') + '</ul>',
-        chips: ['Tell me about ' + picks[0].name.toLowerCase(), 'Recommend something sweet']
+        chips: moodChips(mood, picks[0].name)
       };
     }
     /* generic hunger / recommendation */
     picks = list.filter(function (f) { return f.bestRank; })
       .sort(function (a, b) { return a.bestRank - b.bestRank; }).slice(0, 3);
     return {
-      html: '<p>If I had to feed you right now, I\u2019d go with:</p><ul class="sage-list">'
+      html: '<p>' + pick(RECO_INTROS) + '</p><ul class="sage-list">'
         + picks.map(function (f) {
           return '<li>' + f.emoji + ' <strong>' + esc(f.name) + '</strong> <span class="sage-dim">(★ #' + f.bestRank + ' Best in the World · ' + esc(f.origin) + ')</span><br><span class="sage-dim">' + esc(f.definition) + '</span></li>';
-        }).join('') + '</ul><p class="sage-dim">Want a mood instead? Try “something spicy”, “something sweet”, or “something crunchy”.</p>',
+        }).join('') + '</ul><p class="sage-dim">Want a mood instead? Try \u201csomething spicy\u201d, \u201csomething sweet\u201d, or \u201csomething crunchy\u201d.</p>',
       chips: ['Something spicy', 'Something sweet', 'Something crunchy']
     };
+  }
+
+  /* ------------------------------ new intents ------------------------------ */
+
+  function whyRankedHTML(f) {
+    var s = scoreOf(f);
+    if (f.bestRank || f.worstRank) {
+      return {
+        html: '<p><strong>' + esc(f.name) + '</strong> sits at <strong>' + esc(rankBadge(f)) + '</strong>.</p>'
+          + '<p>' + esc(f.research) + '</p>',
+        chips: ['Tell me about ' + f.name, 'Best ' + f.category.toLowerCase() + '?']
+      };
+    }
+    return {
+      html: '<p><strong>' + esc(f.name) + '</strong> isn\u2019t on the official ranked lists, so it has no rank to explain — but here\u2019s the story:</p>'
+        + '<p>' + esc(f.research) + '</p>',
+      chips: ['Best ' + f.category.toLowerCase() + '?', 'Recommend something ' + (f.category === 'Dessert' || f.category === 'Candy' ? 'sweet' : 'similar')]
+    };
+  }
+
+  function intentFlavorProfile(tl, raw) {
+    var m = raw.match(/what does (.+?) taste like\??$/i) || raw.match(/^is (.+?) spicy\??$/i);
+    if (!m) return null;
+    var db = needsDB(); if (db) return db;
+    var f = findFood(m[1]);
+    if (!f) return { html: '<p>I couldn\u2019t find \u201c' + esc(m[1]) + '\u201d in the encyclopedia.</p>', chips: OPEN_CHIPS };
+    setContext(f, 'flavor');
+    var t = tastesFor(f);
+    if (!t) {
+      return { html: '<p>I don\u2019t have a flavor profile for <strong>' + esc(f.name) + '</strong> yet — but here\u2019s the gist:</p><p>' + esc(f.definition) + '</p>', chips: ['Tell me about ' + f.name, 'Show ' + f.name + ' on the map'] };
+    }
+    var spicyQ = /^is\b/i.test(m[0]);
+    var verdict = spicyQ
+      ? ((t.heat || 0) >= 3 || (t.tags || []).indexOf('spicy') !== -1
+        ? 'Yes — bring water. 🔥' : 'Nope, you\u2019re safe — ' + heatWords(t.heat || 0) + '.')
+      : null;
+    return {
+      html: (verdict ? '<p>' + verdict + '</p>' : '')
+        + '<p><strong>' + esc(f.name) + '</strong> ' + f.emoji + ' tastes like this: ' + esc(flavorLineHTML(f)) + '.</p>'
+        + flavorPillsHTML(f),
+      chips: ['More about ' + f.name.toLowerCase(), 'Show ' + f.name.toLowerCase() + ' on the map', 'Something ' + ((t.tags || []).indexOf('spicy') !== -1 ? 'sweet' : 'spicy')]
+    };
+  }
+
+  function intentFlavorBrowse(tl) {
+    var mood = null;
+    MOODS.forEach(function (m) { if (new RegExp('\\b' + m + '\\b').test(tl)) mood = m; });
+    if (!mood) return null;
+    if (!/(foods?|dishes?|things|stuff|show|find|list|give)\b/.test(tl)) return null;
+    var db = needsDB(); if (db) return db;
+    var pool = foods().filter(function (f) { return moodMatch(f, mood); });
+    pool.sort(function (a, b) { return (a.bestRank || 999) - (b.bestRank || 999) || a.name.localeCompare(b.name); });
+    var top = pool.slice(0, 5);
+    if (!top.length) return { html: '<p>Nothing <strong>' + mood + '</strong> in the database yet — try \u201csomething sweet\u201d.</p>', chips: ['Something sweet', 'Surprise me'] };
+    return {
+      html: '<p>Top ' + mood + ' picks:</p><ol class="sage-list sage-ranked">'
+        + top.map(function (f) {
+          var s = scoreOf(f);
+          return '<li>' + f.emoji + ' <strong>' + esc(f.name) + '</strong> <span class="sage-dim">(' + esc(f.origin) + (s !== null ? ' · ' + s.toFixed(1) + '/10 · ' + tierOf(s) + '-tier' : '') + ')</span></li>';
+        }).join('') + '</ol>',
+      chips: ['Tell me about ' + top[0].name.toLowerCase(), 'Surprise me', 'Something sweet']
+    };
+  }
+
+  var COUNTRY_ADJ = {
+    french: 'France', italian: 'Italy', japanese: 'Japan', chinese: 'China',
+    thai: 'Thailand', korean: 'Korea', indian: 'India', mexican: 'Mexico',
+    spanish: 'Spain', greek: 'Greece', turkish: 'T\u00fcrkiye', vietnamese: 'Vietnam',
+    brazilian: 'Brazil', portuguese: 'Portugal', german: 'Germany'
+  };
+
+  function matchOrigins(q) {
+    var nq = norm(q);
+    var origins = [];
+    foods().forEach(function (f) { if (origins.indexOf(f.origin) === -1) origins.push(f.origin); });
+    if (/\b(usa|america|american|united states)\b/.test(nq)) {
+      return origins.filter(function (o) { return /\b(usa|united states)\b/i.test(o); });
+    }
+    return origins.filter(function (o) {
+      var no = norm(o);
+      return no.indexOf(nq) !== -1 || nq.indexOf(no) !== -1;
+    });
+  }
+
+  function intentCountry(tl, raw) {
+    var m = raw.match(/^(?:food|foods|dishes?)\s+from\s+(.+?)\??$/i)
+      || raw.match(/what'?s good in (.+?)\??$/i);
+    var adj = null;
+    if (!m) {
+      var am = tl.match(/\b(french|italian|japanese|chinese|thai|korean|indian|mexican|spanish|greek|turkish|vietnamese|brazilian|portuguese|german)\s+(dishes?|foods?|cuisine)\b/);
+      if (am) { adj = COUNTRY_ADJ[am[1]]; }
+      else return null;
+    }
+    var db = needsDB(); if (db) return db;
+    var place = adj || m[1].trim();
+    var origins = matchOrigins(place);
+    if (!origins.length) return { html: '<p>I don\u2019t have dishes from \u201c' + esc(place) + '\u201d in the encyclopedia yet. Try another country!</p>', chips: ['Food from Japan', 'Surprise me'] };
+    var pool = foods().filter(function (f) { return origins.indexOf(f.origin) !== -1; });
+    pool.sort(function (a, b) { return (a.bestRank || 999) - (b.bestRank || 999) || a.name.localeCompare(b.name); });
+    var top = pool.slice(0, 5);
+    return {
+      html: '<p>From <strong>' + esc(origins.slice(0, 3).join(', ')) + '</strong>' + (origins.length > 3 ? ' and friends' : '') + ' — ' + pool.length + ' dish' + (pool.length === 1 ? '' : 'es') + ' in the encyclopedia. Top picks:</p><ol class="sage-list sage-ranked">'
+        + top.map(function (f) {
+          var s = scoreOf(f);
+          return '<li>' + f.emoji + ' <strong>' + esc(f.name) + '</strong> <span class="sage-dim">(' + esc(f.origin) + (s !== null ? ' · ' + s.toFixed(1) + '/10 · ' + tierOf(s) + '-tier' : '') + ')</span></li>';
+        }).join('') + '</ol>',
+      chips: ['Tell me about ' + top[0].name.toLowerCase(), 'Food from Italy', 'Surprise me']
+    };
+  }
+
+  function intentSurprise() {
+    var db = needsDB(); if (db) return db;
+    var list = foods();
+    var f = list[Math.floor(Math.random() * list.length)];
+    setContext(f, 'surprise');
+    return {
+      html: '<p>' + pick(['The culinary gods have spoken:', 'Closing my eyes and pointing…', 'Your fate is sealed:']) + '</p>' + foodCardHTML(f),
+      chips: ['Surprise me', 'Tell me about ' + f.name.toLowerCase(), 'Show ' + f.name.toLowerCase() + ' on the map']
+    };
+  }
+
+  function intentPronounce(tl, raw) {
+    var m = raw.match(/how do you pronounce (.+?)\??$/i) || raw.match(/^pronounce (.+?)\??$/i);
+    if (!m) return null;
+    var db = needsDB(); if (db) return db;
+    var f = findFood(m[1]);
+    if (!f) return { html: '<p>I couldn\u2019t find \u201c' + esc(m[1]) + '\u201d in the encyclopedia.</p>', chips: OPEN_CHIPS };
+    setContext(f, 'pronunciation');
+    var p = (typeof PRONUNCIATIONS !== 'undefined' && PRONUNCIATIONS) ? PRONUNCIATIONS[f.name] : null;
+    return {
+      html: p
+        ? '<p><strong>' + esc(f.name) + '</strong> ' + f.emoji + ' is pronounced <strong>' + esc(p) + '</strong> <span class="sage-dim">(CAPS = stressed syllable)</span>.</p>'
+        : '<p>I don\u2019t have a pronunciation guide for <strong>' + esc(f.name) + '</strong> yet.</p>',
+      chips: ['What does ' + f.name.toLowerCase() + ' taste like?', 'Tell me about ' + f.name.toLowerCase()]
+    };
+  }
+
+  function shelfAPI() {
+    if (typeof Shelf !== 'undefined' && Shelf) return Shelf;
+    if (typeof window !== 'undefined' && window.Shelf) return window.Shelf;
+    return null;
+  }
+
+  function intentShelf(tl, raw) {
+    if (!/\b(shelf|favorites|favourites|tried)\b/.test(tl)) return null;
+    var S = shelfAPI();
+    if (!S) return { html: '<p>Your shelf isn\u2019t available on this page — open <strong>My Shelf</strong> from the nav and I can read it there.</p>', chips: OPEN_CHIPS };
+    var db = needsDB(); if (db) return db;
+    var m = raw.match(/(?:have i|did i)\s+tr(?:y|ied)\s+(.+?)\??$/i);
+    if (m) {
+      var f = findFood(m[1]);
+      if (!f) return { html: '<p>I couldn\u2019t find \u201c' + esc(m[1]) + '\u201d in the encyclopedia.</p>', chips: OPEN_CHIPS };
+      setContext(f, 'shelf');
+      var tried = S.has(f.name, 'tried');
+      var rating = S.getRating ? S.getRating(f.name) : null;
+      return {
+        html: tried
+          ? '<p>Yes! You\u2019ve marked ' + f.emoji + ' <strong>' + esc(f.name) + '</strong> as tried ✓' + (rating ? ', and gave it ' + rating + '/5 stars.' : '.') + '</p>'
+          : '<p>Not yet — <strong>' + esc(f.name) + '</strong> isn\u2019t on your Tried It list. Still on the adventure list! 🗺️</p>',
+        chips: ['What\u2019s on my shelf?', 'Tell me about ' + f.name.toLowerCase()]
+      };
+    }
+    var fav = S.list('fav'), want = S.list('try'), triedL = S.list('tried');
+    var explored = S.exploredCount ? S.exploredCount() : 0;
+    if (/\bfavorites?\b|\bfavourites?\b/.test(tl)) {
+      if (!fav.length) return { html: '<p>Your ♥ Favorites list is empty — tap the ♥ on any food card to start it. Your 🤍 Cookbook saves live separately on the <strong>Cookbook</strong> page.</p>', chips: ['Recommend something', 'Surprise me'] };
+      return {
+        html: '<p>Your ♥ Favorites (' + fav.length + '):</p><ul class="sage-list">'
+          + fav.slice(0, 8).map(function (n) { return '<li><strong>' + esc(n) + '</strong></li>'; }).join('') + '</ul>'
+          + '<p class="sage-dim">See everything on the <strong>My Shelf</strong> page.</p>',
+        chips: ['What\u2019s on my shelf?', 'Surprise me']
+      };
+    }
+    if (!fav.length && !want.length && !triedL.length) {
+      return { html: '<p>Your shelf is brand new and empty — no favorites, no want-to-tries, no tried-its yet. The adventure starts with a single bite! Try \u201csurprise me\u201d and tap the ♥ ★ ✓ buttons on anything that tempts you.</p>', chips: ['Surprise me', 'Recommend something'] };
+    }
+    return {
+      html: '<p>Here\u2019s your shelf at a glance:</p><ul class="sage-list">'
+        + '<li>♥ <strong>Favorites:</strong> ' + fav.length + '</li>'
+        + '<li>★ <strong>Want to Try:</strong> ' + want.length + '</li>'
+        + '<li>✓ <strong>Tried It:</strong> ' + triedL.length + '</li>'
+        + '<li>👁️ <strong>Dishes explored:</strong> ' + explored + ' of ' + foods().length + '</li>'
+        + '</ul><p class="sage-dim">Full details live on the <strong>My Shelf</strong> page.</p>',
+      chips: ['My favorites', 'Surprise me']
+    };
+  }
+
+  function intentMapLink(tl, raw) {
+    var m = raw.match(/show (.+?) on the map\??$/i);
+    if (!m) return null;
+    var db = needsDB(); if (db) return db;
+    var f = findFood(m[1]);
+    if (!f) return { html: '<p>I couldn\u2019t find \u201c' + esc(m[1]) + '\u201d in the encyclopedia — but the <a href="map.html"><strong>Flavor Map</strong></a> has every dish I know.</p>', chips: OPEN_CHIPS };
+    setContext(f, 'map');
+    return {
+      html: '<p>' + f.emoji + ' <strong>' + esc(f.name) + '</strong> comes from <strong>' + esc(f.origin) + '</strong> (' + esc(f.region) + '). Find its marker on the <a href="map.html"><strong>Flavor Map →</strong></a></p>',
+      chips: ['Tell me about ' + f.name.toLowerCase(), 'What does ' + f.name.toLowerCase() + ' taste like?']
+    };
+  }
+
+  function intentFollowUp(tl, raw) {
+    var isMore = /^(tell me more|more about it|more|go on|continue|and\?)\??$/.test(tl);
+    var isWhy = /^why is it ranked\??$/.test(tl);
+    var isPron = /^how do (you|i) pronounce it\??$/.test(tl);
+    var isTaste = /^what does it taste like\??$/.test(tl);
+    var isSpicy = /^is it spicy\??$/.test(tl);
+    var isMap = /^show it on the map\??$/.test(tl);
+    var cmpM = tl.match(/^(?:compare it (?:with|to)|it)\s+(?:vs\.?|versus|with|to)\s+(.+)$/)
+      || raw.match(/^compare it (?:with|to) (.+?)\??$/i);
+    if (!isMore && !isWhy && !isPron && !isTaste && !isSpicy && !isMap && !cmpM) return null;
+    if (!lastDish) {
+      return { html: '<p>Which dish do you mean? Name one and I\u2019ll pick up right where we left off — e.g. \u201ctell me about kimchi\u201d.</p>', chips: OPEN_CHIPS };
+    }
+    var f = lastDish;
+    if (isMore) { setContext(f, 'lookup'); return { html: foodCardHTML(f), chips: ['Why is ' + f.name.toLowerCase() + ' ranked?', 'What does ' + f.name.toLowerCase() + ' taste like?'] }; }
+    if (isWhy) { setContext(f, 'rank'); return whyRankedHTML(f); }
+    if (isPron) { setContext(f, 'pronunciation'); return intentPronounce(tl, 'how do you pronounce ' + f.name); }
+    if (isTaste || isSpicy) { setContext(f, 'flavor'); return intentFlavorProfile(tl, isSpicy ? 'is ' + f.name + ' spicy' : 'what does ' + f.name + ' taste like'); }
+    if (isMap) { setContext(f, 'map'); return intentMapLink(tl, 'show ' + f.name + ' on the map'); }
+    if (cmpM) {
+      var db = needsDB(); if (db) return db;
+      var b = findFood(cmpM[1]);
+      if (!b) return { html: '<p>I couldn\u2019t find \u201c' + esc(cmpM[1]) + '\u201d to compare against.</p>', chips: ['Compare ramen vs pho'] };
+      if (norm(b.name) === norm(f.name)) return { html: '<p>That\u2019s ' + f.emoji + ' <strong>' + esc(f.name) + '</strong> vs itself — it wins by default. 🏆</p>', chips: ['Compare ramen vs pho'] };
+      setContext(null, 'compare');
+      return { html: '<p>Head to head:</p>' + compareHTML(f, b), chips: ['Why is ' + f.name.toLowerCase() + ' ranked?', 'Recommend something'] };
+    }
+    return null;
   }
 
   function intentLookup(tl, raw) {
@@ -411,8 +814,10 @@
     if (!f) {
       return { html: '<p>I couldn\u2019t find “' + esc(m[1]) + '” in the encyclopedia. Check the spelling, or try the search bar on the homepage — it searches definitions and origins too.</p>', chips: OPEN_CHIPS };
     }
+    setContext(f, 'lookup');
     var chips = ['Best ' + f.category.toLowerCase() + '?'];
     if (f.bestRank || f.worstRank) chips.unshift('Why is ' + f.name.toLowerCase() + ' ranked?');
+    chips.push('What does ' + f.name.toLowerCase() + ' taste like?');
     return { html: foodCardHTML(f), chips: chips };
   }
 
@@ -420,8 +825,18 @@
     if (tl.split(/\s+/).length > 3) return null;
     var db = needsDB(); if (db) return db;
     var f = findFood(tl);
+    /* Bare place name ("italy") → country intent, unless the food match is a
+     * strong one (query appears whole in the dish name). */
+    if (matchOrigins(tl).length) {
+      var strong = f && norm(f.name).indexOf(tl) !== -1;
+      if (!strong) {
+        var cr = intentCountry(tl, 'food from ' + tl);
+        if (cr) return cr;
+      }
+    }
     if (!f) return null;
-    return { html: foodCardHTML(f), chips: ['Best ' + f.category.toLowerCase() + '?'] };
+    setContext(f, 'lookup');
+    return { html: foodCardHTML(f), chips: ['Best ' + f.category.toLowerCase() + '?', 'What does ' + f.name.toLowerCase() + ' taste like?'] };
   }
 
   function answerFor(rawText) {
@@ -436,7 +851,11 @@
     if (!tl) return intentGreeting(tl);
 
     var r;
-    if (/\b(what can you do|help|capabilit|commands|how (do|can) you)\b/.test(tl)) r = intentHelp();
+    if ((r = intentFollowUp(tl, raw))) {}
+    else if (/\bpronounce\b/.test(tl) && (r = intentPronounce(tl, raw))) {}
+    else if (/\b(surprise me|random dish|random food|pick for me|pick something)\b/.test(tl)) r = intentSurprise();
+    else if ((r = intentShelf(tl, raw))) {}
+    else if (/\b(what can you do|help|capabilit|commands|how (do|can) you)\b/.test(tl)) r = intentHelp();
     else if ((r = intentCompare(tl, raw))) {}
     else if (/\bwho\b.*\b(decide|rank|choose|vote)/.test(tl) || /\bwho decides/.test(tl)) r = intentWhoDecides();
     else if ((r = intentSiteHelp(tl))) {}
@@ -444,10 +863,14 @@
     else if ((r = intentMethodology(tl))) {}
     else if (/why\s+(is|was)\b/.test(tl) && /\branked\b/.test(tl) && (r = intentWhyRanked(tl, raw))) {}
     else if (/\b(best|top|worst)\b/.test(tl) && (r = intentRankQuery(tl))) {}
-    else if (/\b(recommend|suggest|hungry|starving|craving)\b/.test(tl) || /\bsomething\s+(spicy|sweet|crunchy)\b/.test(tl)) r = intentRecommend(tl);
+    else if ((r = intentFlavorProfile(tl, raw))) {}
+    else if ((r = intentFlavorBrowse(tl))) {}
+    else if ((r = intentCountry(tl, raw))) {}
+    else if ((r = intentMapLink(tl, raw))) {}
+    else if (/\b(recommend|suggest|hungry|starving|craving)\b/.test(tl) || /\bsomething\s+(spicy|sweet|crunchy|creamy|umami|smoky|sour|fresh)\b/.test(tl)) r = intentRecommend(tl);
     else if ((r = intentLookup(tl, raw))) {}
     else if ((r = intentShortLookup(tl))) {}
-    else r = { html: '<p>Hmm, I didn\u2019t quite catch that. I\u2019m best with food questions — try one of these:</p>', chips: ['Tell me about kimchi', 'Top 5 snacks?', 'Something crunchy'] };
+    else r = { html: '<p>' + pick(FALLBACKS) + '</p>', chips: ['Tell me about kimchi', 'Top 5 snacks?', 'Something crunchy'] };
 
     if (greeted && r && !/greet/i.test(r.html)) r.html = '<p>Hey! 👋</p>' + r.html;
     return r;
@@ -600,7 +1023,8 @@
     module.exports = {
       scoreOf: scoreOf, tierOf: tierOf, starsOf: starsOf,
       findFood: findFood, answerFor: answerFor, foodCardHTML: foodCardHTML,
-      compareHTML: compareHTML, norm: norm
+      compareHTML: compareHTML, norm: norm, lev: lev,
+      _resetMemory: resetMemory
     };
   }
 })();
