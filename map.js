@@ -322,8 +322,8 @@
 
   /* ---------------- map construction ---------------- */
 
-  var FALLBACK_MSG = "The interactive map couldn't load (network needed for map tiles). "
-    + "You can still browse every dish via Search.";
+  var FALLBACK_MSG = "The interactive map couldn't load — the map library or its tiles look blocked on this network (an ad-blocker or firewall can do this). "
+    + "Try allowing unpkg.com / cdnjs.cloudflare.com, or browse every dish via Search.";
 
   function showFallback() {
     var fb = document.getElementById("fmFallback");
@@ -350,10 +350,26 @@
     var origins = Object.keys(CENTROIDS).filter(function (o) { return dishesOf(o).length > 0; });
 
     var map = L.map("flavormap", { worldCopyJump: true, zoomControl: true }).setView([20, 10], 2);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    var osmTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    });
+    var darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    });
+    osmTiles.addTo(map);
+    /* If OSM tiles are blocked on this network, fall back to CARTO's dark
+     * tiles (which suit the navy theme anyway) after a few failures. */
+    var tileErrors = 0, tilesSwapped = false;
+    osmTiles.on("tileerror", function () {
+      if (tilesSwapped || ++tileErrors < 8) return;
+      tilesSwapped = true;
+      try {
+        map.removeLayer(osmTiles);
+        darkTiles.addTo(map);
+      } catch (e) { /* noop */ }
+    });
 
     /* Nudge exact duplicate centroids apart (e.g. "USA" vs "United States",
      * "Hawaii" vs "Hawaii, USA") so overlapping markers stay clickable. */
