@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Community · Global Food Encyclopedia</title>
-<meta name="description" content="Join the public discussion about foods from every continent — powered by GitHub Discussions. Your star ratings stay personal and private, in your own browser.">
+<meta name="description" content="Join the public discussion about foods from every continent — no account needed, post as a guest or anonymously. Your star ratings stay personal and private, in your own browser.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Community · Global Food Encyclopedia">
-<meta property="og:description" content="Public discussion about foods from every continent. Comments via GitHub Discussions; star ratings stay personal and private.">
+<meta property="og:description" content="Public discussion about foods from every continent. No account needed to comment; star ratings stay personal and private.">
 <meta property="og:url" content="https://isukiro.github.io/food-rankings/community.html">
 <meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
@@ -71,7 +71,8 @@
   <a href="community.html" class="current">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="cookbook.html">Cookbook</a>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
 </nav>
 
 <main class="community-wrap">
@@ -80,70 +81,62 @@
 
   <!-- ============ SETUP CHECKLIST: comments go live only after the owner does these ============ -->
   <section class="setup-banner" aria-label="Comment system setup checklist">
-    <h2>⚠ Comments aren't live yet — 3 steps for the site owner</h2>
-    <p>Comments on this page run on <strong>giscus</strong> (free, backed by GitHub Discussions, works on static hosting like GitHub Pages). Before visitors can comment, the owner must:</p>
+    <h2>⚠ Comments aren't live yet — quick setup for the site owner</h2>
+    <p>Comments on this page run on <strong>Cusdis</strong> (free, lightweight, works on static hosting — and visitors can post <strong>with no account at all, even anonymously</strong>). To go live:</p>
     <ol>
-      <li>Enable <strong>Discussions</strong> under the repo's <code>Settings → General</code> (Features section).</li>
-      <li>Install the <strong>giscus app</strong> on the <code>Isukiro/food-rankings</code> repo: <a href="https://github.com/apps/giscus">https://github.com/apps/giscus</a></li>
-      <li>Create a discussion category called <strong>"Comments"</strong> (under the Discussions tab → Categories), then hand the <strong>category ID</strong> to the assistant so the embed below can be finalized with real IDs.</li>
+      <li>Sign up at <a href="https://cusdis.com">cusdis.com</a> and add the website <code>isukiro.github.io/food-rankings</code>.</li>
+      <li>In the Cusdis dashboard, copy the <strong>App ID</strong> (anonymous/guest commenting is on by default).</li>
+      <li>Hand the <strong>App ID</strong> to the assistant — the embed below goes live with it.</li>
     </ol>
-    <p class="note">Until those IDs are pasted into the embed below, the discussion area shows a "coming soon" card instead of a broken comment box. Everything else on this page works normally.</p>
+    <p class="note">Until then, the discussion area shows a "coming soon" card. New comments wait for your approval in the Cusdis dashboard, so no spam surprises.</p>
   </section>
 
-  <p class="lead">Two things look similar on this site but do very different jobs: <strong>giscus comments</strong> are <em>public discussion</em> with other visitors — you'll need a free GitHub account to post, and everything you write is visible to everyone. The <strong>star ratings</strong> you see on rankings and food pages are the opposite: they are <em>your personal scores</em>, stored only in your own browser, never uploaded, never shared.</p>
+  <p class="lead">Two things look similar on this site but do very different jobs: the <strong>comments</strong> below are <em>public discussion</em> with other visitors — no account needed, post as a guest or anonymously, and everything you write is visible to everyone once approved. The <strong>star ratings</strong> you see on rankings and food pages are the opposite: they are <em>your personal scores</em>, stored only in your own browser, never uploaded, never shared.</p>
 
   <p class="lead">Debate the rankings, recommend hidden gems, or correct us — politely. Taste is personal, and the table is big enough for all of it.</p>
 
   <section class="comments-shell" aria-label="Visitor comments">
     <h2>💬 Join the discussion</h2>
-    <p>Sign in with GitHub to post. Be kind: no spam, no hate, no spoiling somebody's dinner.</p>
+    <p>No account needed — post as a guest, even anonymously. Be kind: no spam, no hate, no spoiling somebody's dinner.</p>
 
     <!-- ================================================================
-         GISCUS EMBED — to take comments live, paste the real category ID
-         into data-category-id below (and the matching name in
-         data-category), then flip data-ready to "true". The bootstrap
-         script only loads giscus when it is configured; until then
+         CUSDIS EMBED — to take comments live, paste the real App ID into
+         data-app-id below and flip data-ready to "true". The bootstrap
+         script only loads Cusdis when it is configured; until then
          visitors see a clean "coming soon" card, never a broken widget.
          ================================================================ -->
-    <div id="giscusMount"
-         data-repo="Isukiro/food-rankings"
-         data-repo-id="R_kgDOUsN95w"
-         data-category="Comments"
-         data-category-id="SETUP-NEEDED"
-         data-ready="false"></div>
+    <div id="cusdisMount" data-app-id="SETUP-NEEDED" data-ready="false"></div>
     <script>
     (function () {
-      var mount = document.getElementById('giscusMount');
+      var mount = document.getElementById('cusdisMount');
       if (!mount) return;
-      var catId = mount.getAttribute('data-category-id') || '';
+      var appId = mount.getAttribute('data-app-id') || '';
       var ready = mount.getAttribute('data-ready') === 'true'
-        && catId.indexOf('SETUP-NEEDED') !== 0;
+        && appId.indexOf('SETUP-NEEDED') !== 0;
       if (!ready) {
         mount.innerHTML = '<div class="giscus-soon">'
           + '<p><strong>💬 Comments open soon.</strong></p>'
           + '<p>The discussion table is still being set — check back shortly. '
-          + 'In the meantime, the star ratings you give any dish are saved privately in your own browser.</p>'
+          + 'Anyone will be able to post here, no account needed, even anonymously.</p>'
           + '</div>';
         return;
       }
+      var thread = document.createElement('div');
+      thread.id = 'cusdis_thread';
+      thread.setAttribute('data-host', 'https://cusdis.com');
+      thread.setAttribute('data-app-id', appId);
+      thread.setAttribute('data-page-id', 'community');
+      thread.setAttribute('data-page-url', 'https://isukiro.github.io/food-rankings/community.html');
+      thread.setAttribute('data-page-title', 'The Community Table');
+      mount.appendChild(thread);
       var s = document.createElement('script');
-      s.src = 'https://giscus.app/client.js';
+      s.src = 'https://cusdis.com/js/cusdis.es.js';
       s.async = true;
-      s.setAttribute('crossorigin', 'anonymous');
-      ['repo', 'repo-id', 'category', 'category-id'].forEach(function (k) {
-        s.setAttribute('data-' + k, mount.getAttribute('data-' + k));
-      });
-      s.setAttribute('data-mapping', 'pathname');
-      s.setAttribute('data-strict', '0');
-      s.setAttribute('data-reactions-enabled', '1');
-      s.setAttribute('data-emit-metadata', '0');
-      s.setAttribute('data-input-position', 'top');
-      s.setAttribute('data-theme', 'dark');
-      s.setAttribute('data-lang', 'en');
+      s.defer = true;
       mount.appendChild(s);
     })();
     </script>
-    <!-- ============ END GISCUS EMBED ============ -->
+    <!-- ============ END CUSDIS EMBED ============ -->
   </section>
 </main>
 
