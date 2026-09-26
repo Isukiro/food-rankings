@@ -31,21 +31,61 @@ h1, h2, h3 {
   font-size: clamp(2.4rem, 6vw, 4.2rem);
   margin: 14px 0 6px; color: var(--cream);
 }
+.hero h1 .gold { color: var(--gold-bright); }
 .hero h1::after {
   content: ""; display: block; width: 120px; height: 2px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
   margin: 18px auto 0;
 }
 .sub { color: var(--muted); max-width: 620px; margin: 14px auto 30px; font-size: 1.02rem; }
-.search-wrap { max-width: 440px; margin: 0 auto 26px; }
-#search {
-  width: 100%; padding: 13px 22px; border-radius: 999px;
-  border: 1px solid var(--card-edge); background: rgba(0, 0, 0, 0.35);
-  color: var(--cream); font-size: 1rem; font-family: inherit; outline: none;
-  transition: border-color 0.2s;
+.search-hero {
+  max-width: 680px; margin: 0 auto 26px;
+  display: flex; gap: 12px; align-items: stretch;
 }
-#search:focus { border-color: var(--gold); }
-#search::placeholder { color: #5d6b87; }
+#searchInput {
+  flex: 1; padding: 16px 26px; border-radius: 999px;
+  border: 1px solid var(--card-edge); background: rgba(0, 0, 0, 0.45);
+  color: var(--cream); font-size: 1.1rem; font-family: inherit; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#searchInput:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15); }
+#searchInput::placeholder { color: #5d6b87; }
+.gold-btn {
+  cursor: pointer; border: none; border-radius: 999px;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #101c34; font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem; font-weight: 700; letter-spacing: 0.5px;
+  padding: 0 28px; white-space: nowrap; transition: transform 0.15s, box-shadow 0.15s;
+}
+.gold-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(201, 162, 39, 0.35); }
+.chip-group { max-width: 900px; margin: 0 auto 14px; }
+.chip-label {
+  display: block; text-align: center; font-size: 0.72rem; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+}
+.result-count {
+  text-align: center; color: var(--gold-bright); font-family: Georgia, serif;
+  font-style: italic; margin: 6px 0 22px; min-height: 1.4em;
+}
+.cat-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.cat-tag {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--gold-bright); border: 1px solid var(--card-edge);
+  padding: 4px 12px; border-radius: 999px; background: var(--gold-soft);
+}
+.rank-badge {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.6px;
+  padding: 4px 12px; border-radius: 999px;
+}
+.rank-badge.best { background: var(--gold); color: #101c34; }
+.rank-badge.worst { background: #5c1a1a; color: #f0b0b0; border: 1px solid #8a2f2f; }
+.card .definition {
+  margin-top: 12px; padding: 12px 14px; border-left: 3px solid var(--gold);
+  background: rgba(0, 0, 0, 0.25); border-radius: 0 8px 8px 0;
+  color: #dbe2ef; font-size: 0.94rem; font-style: italic;
+}
+.card .research { color: #c3ccdd; font-size: 0.92rem; margin-top: 12px; }
+.card .research strong { color: var(--gold-bright); font-weight: 600; }
 .tabs {
   display: inline-flex; gap: 8px; padding: 6px; border-radius: 999px;
   background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-edge);
@@ -110,6 +150,39 @@ main { max-width: 1180px; margin: 0 auto; padding: 20px 22px 40px; }
   border: 1px solid var(--gold); color: var(--gold-bright); background: var(--gold-soft);
 }
 .empty { text-align: center; color: var(--muted); padding: 36px; font-style: italic; font-family: Georgia, serif; }
+
+/* ---- Formal ranked leaderboard (Top 100 tabs) ---- */
+.leader-row {
+  display: flex; gap: 26px; align-items: flex-start;
+  padding: 30px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.leader-row:first-child { border-top: 1px solid var(--rule); }
+.leader-rank {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.8rem; font-weight: 600; line-height: 1.1;
+  color: var(--gold); min-width: 76px; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.leader-main { flex: 1; min-width: 0; }
+.leader-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.55rem; color: var(--cream); letter-spacing: 0.4px;
+}
+.leader-sub {
+  font-size: 0.74rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--gold-bright); margin-top: 6px; font-weight: 600;
+}
+.leader-def {
+  margin: 14px 0 0 4px; padding-left: 20px;
+  border-left: 2px solid var(--gold);
+  color: #dbe2ef; font-style: italic; font-size: 0.97rem; line-height: 1.7;
+}
+.leader-res {
+  margin: 10px 0 0 4px; padding-left: 20px;
+  color: #a8b3c7; font-size: 0.9rem; line-height: 1.7;
+}
+.leader-res strong { color: var(--gold-bright); font-weight: 600; }
 footer {
   text-align: center; color: var(--muted); padding: 44px 24px;
   font-size: 0.9rem; border-top: 1px solid var(--card-edge);
@@ -118,4 +191,10 @@ footer {
 @media (max-width: 640px) {
   .grid { grid-template-columns: 1fr; }
   .hero { padding: 52px 16px 22px; }
+  .search-hero { flex-direction: column; }
+  .gold-btn { padding: 14px 28px; }
+  .tab { padding: 10px 18px; font-size: 0.9rem; }
+  .leader-row { gap: 16px; padding: 22px 4px; }
+  .leader-rank { font-size: 2rem; min-width: 52px; }
+  .leader-name { font-size: 1.3rem; }
 }
