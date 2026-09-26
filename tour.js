@@ -310,32 +310,33 @@
   }
 
   function injectReplayLink() {
-    if (document.getElementById(REPLAY_ID)) return; // guard against double-injection
-    var nav = document.querySelector('nav.site-nav');
-    if (!nav) return;
-    var divider = document.createElement('span');
-    divider.className = 'nav-divider';
-    divider.setAttribute('aria-hidden', 'true');
-    divider.textContent = '◆';
-    var link = document.createElement('a');
-    link.id = REPLAY_ID;
-    link.textContent = 'Take the tour';
+    /* Retired: the nav now has a grouped "Help" menu containing its own
+     * "Take the Tour" item (#tour-nav-link, bound in init()), so injecting
+     * a second link would duplicate it. Kept as a no-op for safety. */
+    return;
+  }
+  /* Binds the "Take the Tour" item in the nav's Help dropdown menu.
+   * The tour's steps describe the homepage, so on other pages the item
+   * takes you home and starts it there (same behavior the old injected
+   * nav link had). */
+  function bindMenuTourLink() {
+    var link = document.getElementById('tour-nav-link');
+    if (!link || link.__frTourBound) return;
+    link.__frTourBound = true;
     if (isHomePage()) {
-      link.href = '#';
       link.addEventListener('click', function (e) {
         e.preventDefault();
         startFoodTour();
       });
     } else {
-      link.href = 'index.html#tour';
+      link.setAttribute('href', 'index.html#tour');
     }
-    nav.appendChild(divider);
-    nav.appendChild(link);
   }
 
   function init() {
     injectStyles();
     injectReplayLink();
+    bindMenuTourLink();
     var viaLink = false;
     try {
       if (location.hash === '#tour') {
