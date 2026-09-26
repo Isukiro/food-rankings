@@ -73,6 +73,7 @@
     '#fr-theme-btn{background:none;border:0;cursor:pointer;font-size:1.1rem;line-height:1;',
     'padding:6px 8px;margin-left:10px;vertical-align:middle;color:var(--muted,#93a1bd);border-radius:8px}',
     '#fr-theme-btn:hover{color:var(--accent,#d4af37);background:color-mix(in srgb,var(--primary,#c9a227) 12%,transparent)}',
+    '.fr-theme-btn-label{font-size:.78rem;letter-spacing:2px;text-transform:uppercase;margin-left:7px;vertical-align:middle}',
     '#fr-theme-panel{position:fixed;top:76px;right:16px;z-index:300;width:294px;max-width:calc(100vw - 32px);',
     'background:var(--surface,#0d2140);border:1px solid var(--card-edge,rgba(201,162,39,.28));border-radius:14px;',
     'box-shadow:0 18px 50px rgba(0,0,0,.5);padding:20px 18px 16px;',
@@ -127,10 +128,10 @@
     panel.id = 'fr-theme-panel';
     panel.hidden = true;
     panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-label', 'Theme settings');
+    panel.setAttribute('aria-label', 'Customize theme');
     panel.innerHTML =
-      '<button type="button" class="fr-theme-close" aria-label="Close theme settings">×</button>'
-      + '<p class="fr-theme-title">Theme</p>'
+      '<button type="button" class="fr-theme-close" aria-label="Close theme customization">×</button>'
+      + '<p class="fr-theme-title">Customize</p>'
       + '<p class="fr-theme-sub">Pick a preset, or mix your own colors.</p>'
       + '<div class="fr-theme-swatches">' + PRESET_ORDER.map(swatchHTML).join('') + '</div>'
       + '<span class="fr-theme-custom-label">Custom colors</span>'
@@ -276,9 +277,9 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'fr-theme-btn';
-    btn.setAttribute('aria-label', 'Theme settings');
-    btn.setAttribute('title', 'Theme settings');
-    btn.textContent = '⚙️';
+    btn.setAttribute('aria-label', 'Customize theme');
+    btn.setAttribute('title', 'Customize theme');
+    btn.innerHTML = '<span aria-hidden="true">\u2699</span><span class="fr-theme-btn-label">Customize</span>';
     nav.appendChild(btn);
 
     var panel = buildPanel();
