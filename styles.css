@@ -106,10 +106,10 @@ h1, h2, h3 {
   padding: 0 28px; white-space: nowrap; transition: transform 0.15s, box-shadow 0.15s;
 }
 .gold-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--primary) 35%, transparent); }
-.chip-group { max-width: 900px; margin: 0 auto 14px; }
+.chip-group { max-width: 900px; margin: 0 auto 30px; }
 .chip-label {
-  display: block; text-align: center; font-size: 0.72rem; letter-spacing: 3px;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  display: block; text-align: center; font-size: 0.78rem; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 13px;
 }
 .result-count {
   text-align: center; color: var(--accent); font-family: Georgia, serif;
@@ -742,7 +742,7 @@ inset 0 0 8px color-mix(in srgb,var(--accent,#d4af37) 60%,transparent)}
 
 /* ---- Search lives in its own band below the hero now ---- */
 .search-section .search-hero { margin-top: 8px; }
-.search-section .chip-group { margin-bottom: 18px; }
+.search-section .chip-group { margin-bottom: 30px; }
 
 /* ---- Sage callout keeps its place, with more air ---- */
 .sage-callout { margin-top: 40px; }
@@ -809,3 +809,129 @@ inset 0 0 8px color-mix(in srgb,var(--accent,#d4af37) 60%,transparent)}
   font-size: .72rem; font-weight: 700; letter-spacing: 0;
 }
 .account-signout { font-size: .78rem; }
+
+/* ---------- grouped nav dropdowns ---------- */
+.nav-group { position: relative; display: inline-block; vertical-align: middle; }
+.nav-group-btn {
+  background: none; border: 0; padding: 4px 2px; margin: 0; cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif; font-size: 0.82rem;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--text);
+}
+.site-nav .nav-group-btn:hover, .site-nav .nav-group-btn.current { color: var(--accent); }
+.nav-caret { font-size: 0.65em; margin-left: 3px; }
+.nav-menu {
+  display: none; position: absolute; top: calc(100% + 10px); left: 50%;
+  transform: translateX(-50%); min-width: 210px; z-index: 500;
+  background: var(--surface, #0d2140);
+  border: 1px solid rgba(201, 162, 39, 0.32); border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55); padding: 8px; text-align: left;
+}
+.nav-group:hover .nav-menu, .nav-group:focus-within .nav-menu { display: block; }
+.nav-menu a {
+  display: block; padding: 10px 14px; border-radius: 8px; white-space: nowrap;
+}
+.nav-menu a:hover { background: rgba(201, 162, 39, 0.12); }
+.nav-menu a.current { color: var(--accent); }
+@media (max-width: 760px) {
+  .nav-group-btn { font-size: 0.72rem; letter-spacing: 1px; }
+  .nav-menu { min-width: 180px; }
+}
+
+
+/* ---- Flavor line on food cards: tiny label + tag pills linking to the map ---- */
+.flavor-line {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  margin-top: 10px; text-decoration: none;
+}
+.flavor-label {
+  font-size: 0.68rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted); margin-right: 2px;
+}
+.flavor-pill {
+  font-size: 0.7rem; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--card-edge); border-radius: 999px;
+  padding: 3px 11px; background: rgba(201, 162, 39, 0.06); white-space: nowrap;
+}
+a.flavor-line:hover .flavor-pill { border-color: var(--accent); }
+
+/* ---- Food of the Day: compact teaser that expands into a big showcase ---- */
+.fotd-teaser {
+  display: flex; gap: 22px; align-items: center; max-width: 660px; margin: 0 auto;
+  padding: 22px 26px; cursor: pointer; text-align: left;
+  background: var(--surface); border: 1px solid var(--card-edge); border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.35), 0 14px 40px rgba(0, 0, 0, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.fotd-teaser:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px var(--accent), 0 18px 48px rgba(0, 0, 0, 0.5);
+}
+.fotd-teaser:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.fotd-teaser-media { position: relative; width: 96px; height: 96px; flex: none; }
+.fotd-teaser-media .emoji-tile { border-radius: 14px; font-size: 2.6rem; }
+.fotd-teaser-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 14px;
+}
+.fotd-teaser-body .kicker { margin-bottom: 2px; }
+.fotd-teaser-body h3 { margin: 6px 0 4px; font-size: 1.5rem; }
+.fotd-reveal-hint {
+  margin: 10px 0 0; color: var(--accent); font-size: 0.82rem;
+  letter-spacing: 2.5px; text-transform: uppercase; font-weight: 700;
+}
+.fotd-teaser .fotd-comeback { margin-top: 8px; }
+.fotd-showcase {
+  position: relative; max-width: 880px; margin: 0 auto; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--card-edge); border-radius: 20px;
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.4), 0 24px 70px rgba(0, 0, 0, 0.55);
+  animation: fotd-rise 0.35s ease;
+}
+@keyframes fotd-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+.fotd-showcase-media {
+  position: relative; height: 340px; overflow: hidden; background: var(--surface-2);
+  border-bottom: 1px solid var(--card-edge);
+}
+.fotd-showcase-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fotd-showcase-emoji { font-size: 6rem; }
+.fotd-collapse {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--card-edge); background: rgba(6, 11, 22, 0.78);
+  color: var(--accent); font-size: 1.3rem; line-height: 1; cursor: pointer;
+}
+.fotd-collapse:hover { border-color: var(--accent); color: #fff; }
+.fotd-showcase-body { padding: 34px 40px 40px; text-align: left; }
+.fotd-showcase-body h2 { font-size: clamp(2rem, 4vw, 2.6rem); margin: 10px 0 6px; letter-spacing: 1px; }
+@media (max-width: 640px) {
+  .fotd-teaser { gap: 16px; padding: 18px; }
+  .fotd-teaser-media { width: 72px; height: 72px; }
+  .fotd-showcase-media { height: 220px; }
+  .fotd-showcase-body { padding: 24px 22px 28px; }
+}
+
+/* ---- "You are here" marker on the flavor map ---- */
+.yah-wrap { background: none; border: none; }
+.yah-dot {
+  position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  border-radius: 50%; background: var(--accent, #d4af37);
+  border: 2px solid #060b16; box-shadow: 0 0 14px rgba(212, 175, 55, 0.9);
+}
+.yah-pulse {
+  position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  border-radius: 50%; border: 2px solid var(--accent, #d4af37);
+  animation: yah-ping 1.8s ease-out infinite; pointer-events: none;
+}
+@keyframes yah-ping {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+.yah-label {
+  position: absolute; top: -36px; left: 0; transform: translateX(-50%);
+  white-space: nowrap; background: #060b16; color: var(--accent, #d4af37);
+  border: 1px solid var(--card-edge, #c9a227); font-size: 0.7rem;
+  letter-spacing: 1.8px; text-transform: uppercase; padding: 5px 12px;
+  border-radius: 999px; pointer-events: none;
+}
