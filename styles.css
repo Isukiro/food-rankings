@@ -159,7 +159,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 20px 22px 40px; }
 }
 .chip {
   cursor: pointer; font-family: inherit; font-size: 0.85rem; letter-spacing: 0.4px;
-  padding: 7px 16px; border-radius: 999px;
+  padding: 10px 18px; border-radius: 999px;
   border: 1px solid var(--card-edge); background: transparent; color: var(--muted);
   transition: all 0.18s;
 }
@@ -934,4 +934,113 @@ a.flavor-line:hover .flavor-pill { border-color: var(--accent); }
   border: 1px solid var(--card-edge, #c9a227); font-size: 0.7rem;
   letter-spacing: 1.8px; text-transform: uppercase; padding: 5px 12px;
   border-radius: 999px; pointer-events: none;
+}
+
+/* ============ dad-proofing: sticky tabs, pagination, compact rows ============ */
+.tabs-wrap {
+  position: sticky; top: 0; z-index: 120;
+  background: var(--bg, #060f21);
+  padding: 12px 0; border-bottom: 1px solid rgba(201, 162, 39, 0.18);
+  text-align: center;
+}
+.tabs-wrap .tabs { margin: 0 auto; }
+.tab {
+  min-height: 48px; min-width: 48px;
+  padding: 14px 34px; font-size: 1.05rem;
+}
+.tab.active {
+  background: var(--primary); color: var(--ink-on-primary); font-weight: 700;
+  box-shadow: 0 0 0 2px var(--primary), 0 4px 16px rgba(201, 162, 39, 0.35);
+}
+#leaderboard { scroll-margin-top: 120px; }
+
+/* pagination */
+.page-nav {
+  display: flex; gap: 8px; justify-content: center; align-items: center;
+  margin: 28px 0 12px; flex-wrap: wrap;
+}
+.page-btn {
+  min-width: 44px; min-height: 44px; padding: 10px 14px;
+  border-radius: 10px; border: 1px solid rgba(201, 162, 39, 0.4);
+  background: transparent; color: var(--text);
+  font-family: inherit; font-size: 0.95rem; cursor: pointer;
+}
+.page-btn:hover:not([disabled]) { background: rgba(201, 162, 39, 0.12); }
+.page-btn.current { background: var(--primary); color: var(--ink-on-primary); font-weight: 700; }
+.page-btn[disabled] { opacity: 0.35; cursor: default; }
+.page-ellipsis { color: var(--muted); padding: 0 2px; }
+
+/* comfortable / compact view toggle */
+.view-toggle {
+  display: inline-flex; border: 1px solid rgba(201, 162, 39, 0.4);
+  border-radius: 999px; overflow: hidden;
+}
+.view-btn {
+  border: 0; background: transparent; color: var(--muted);
+  padding: 10px 20px; min-height: 44px; cursor: pointer;
+  font-family: inherit; font-size: 0.9rem; letter-spacing: 0.4px;
+}
+.view-btn.active { background: var(--primary); color: var(--ink-on-primary); font-weight: 700; }
+
+/* compact leaderboard rows: dense, fast to scan */
+.leader-compact { padding: 10px 14px; }
+.leader-compact .leader-main { gap: 2px; }
+.leader-compact .leader-name { font-size: 1.02rem; }
+.leader-compact .leader-sub { font-size: 0.82rem; margin: 2px 0 4px; }
+.leader-compact .leader-meta { margin-top: 2px; }
+
+/* search "show more" */
+.search-more-wrap { text-align: center; margin: 20px 0 6px; }
+.search-more-wrap .gold-btn { min-height: 48px; padding: 13px 34px; font-size: 1rem; }
+
+@media (max-width: 760px) {
+  .tab { padding: 12px 20px; font-size: 0.95rem; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Search organization pass — formal, calm hierarchy (appended).       */
+/* ------------------------------------------------------------------ */
+
+/* One tidy filter group: labels in a fixed left column, chips on the right. */
+.search-filters {
+  max-width: 900px; margin: 20px auto 6px;
+  border-top: 1px solid var(--card-edge);
+  padding-top: 18px;
+}
+.search-filters .chip-group {
+  display: flex; align-items: baseline; gap: 16px;
+  margin: 0 auto 14px; max-width: none;
+}
+.search-filters .chip-group:last-child { margin-bottom: 0; }
+.search-filters .chip-label {
+  flex: 0 0 108px; text-align: right;
+  font-size: 0.78rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: 0;
+}
+.search-filters .chips { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* "Popular now" quick-search strip — one orderly row under the search bar. */
+.quick-strip {
+  max-width: 680px; margin: 12px auto 0;
+  text-align: center; color: var(--muted); font-size: 0.9rem;
+}
+.quick-label {
+  font-size: 0.72rem; letter-spacing: 2.5px; text-transform: uppercase;
+  margin-right: 10px; color: var(--accent); font-weight: 700;
+}
+.quick-link {
+  background: none; border: none; cursor: pointer;
+  color: var(--text); font: inherit; padding: 10px 12px;
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.quick-link:hover { color: var(--accent); }
+
+/* Give the search hero a touch more breathing room above the quick strip. */
+.search-section .search-hero { margin-bottom: 4px; }
+
+/* Smaller screens: labels sit above the chips instead of beside them. */
+@media (max-width: 560px) {
+  .search-filters .chip-group { flex-direction: column; gap: 8px; }
+  .search-filters .chip-label { flex: none; text-align: left; }
 }
