@@ -52,6 +52,42 @@
   var currentStep = 0;
   var tourOpen = false;
   var positionTimer = null;
+  var scrollWaiter = null;
+
+  /* Keep only targets that are actually rendered (some ids, e.g. #fotdCard,
+     appear multiple times when a template + live copy coexist). */
+  function visibleTargets(list) {
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var r = list[i].getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) out.push(list[i]);
+      } catch (e) { /* skip */ }
+    }
+    return out;
+  }
+
+  function clearScrollWaiter() {
+    if (scrollWaiter) { clearInterval(scrollWaiter); scrollWaiter = null; }
+  }
+
+  /* Wait until the smooth auto-scroll actually settles before measuring
+     element positions. The old fixed 380ms timeout measured mid-scroll and
+     could park the card thousands of pixels off-screen, killing the tour. */
+  function waitScrollSettled(cb) {
+    clearScrollWaiter();
+    var lastY = (typeof window.scrollY === 'number') ? window.scrollY : 0;
+    var stable = 0, tries = 0;
+    scrollWaiter = setInterval(function () {
+      tries++;
+      var y = (typeof window.scrollY === 'number') ? window.scrollY : 0;
+      if (y === lastY) { stable++; } else { stable = 0; lastY = y; }
+      if (stable >= 2 || tries >= 22) {
+        clearScrollWaiter();
+        cb();
+      }
+    }, 120);
+  }
 
   function storageGet(k) {
     try { return window.localStorage.getItem(k); } catch (e) { return null; }
@@ -260,6 +296,14 @@
       else top = Math.max(16, (vh - cardH) / 2);
       card.style.left = left + 'px';
       card.style.top = top + 'px';
+      /* Safety net: if the card would still land off-screen (e.g. the page
+         kept moving after measuring), center it instead of stranding the
+         tour with unreachable buttons. */
+      if (top < -cardH || top > vh || left > vw) {
+        card.classList.add('ft-centered');
+        card.style.left = '';
+        card.style.top = '';
+      }
     } else {
       card.classList.add('ft-centered');
     }
@@ -307,15 +351,17 @@
         for (var t = 0; t < found.length; t++) targets.push(found[t]);
       } catch (e) { targets = []; }
     }
+    targets = visibleTargets(targets);
 
     if (positionTimer) { clearTimeout(positionTimer); positionTimer = null; }
+    clearScrollWaiter();
 
     if (targets.length) {
       try { targets[0].scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* noop */ }
-      positionTimer = setTimeout(function () {
+      waitScrollSettled(function () {
         drawRings(targets);
         positionCard(targets);
-      }, 380);
+      });
     } else {
       drawRings([]);
       positionCard(null);
@@ -329,6 +375,7 @@
     var overlay = document.getElementById(OVERLAY_ID);
     if (overlay) overlay.remove();
     if (positionTimer) { clearTimeout(positionTimer); positionTimer = null; }
+    clearScrollWaiter();
     tourOpen = false;
   }
 
