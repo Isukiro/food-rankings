@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flavor Map — The Global Food Encyclopedia</title>
+<meta name="description" content="Explore every dish in the encyclopedia on an interactive world map — marker size shows how many dishes each place claims, and every pin opens that country's top foods.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Flavor Map — The Global Food Encyclopedia">
+<meta property="og:description" content="Every dish in the encyclopedia, pinned on a world map. Marker size = number of dishes; click a pin for that place's top foods.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/map.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="modal.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* Flavor Map page styles (map.html only; theme variables come from styles.css). */
+.fm-wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; }
+.fm-intro { text-align: center; max-width: 720px; margin: 0 auto 24px; color: var(--muted); }
+#fmFilters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 auto 10px; }
+#fmStatus { text-align: center; color: var(--accent); font-family: Georgia, serif; font-style: italic; margin: 6px 0 18px; min-height: 1.4em; }
+#flavormap {
+  height: 560px; border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--card-edge, rgba(201,162,39,.35));
+  box-shadow: 0 12px 32px rgba(0,0,0,.4);
+  background: var(--bg); z-index: 0;
+}
+/* Darken OSM tiles to fit the navy/gold theme. */
+#flavormap .leaflet-tile-pane { filter: brightness(.82) saturate(.85); }
+/* Themed popups. */
+#flavormap .leaflet-popup-content-wrapper {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--primary); border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+}
+#flavormap .leaflet-popup-content { margin: 14px 16px; line-height: 1.45; }
+#flavormap .leaflet-popup-tip { background: var(--surface); border: 1px solid var(--primary); }
+#flavormap .leaflet-popup-close-button { color: var(--muted); }
+.fm-popup h4 { margin: 0 0 2px; font-family: Georgia, serif; color: var(--accent); font-size: 1.05rem; }
+.fm-popup .fm-sub { margin: 0 0 8px; color: var(--muted); font-size: .8rem; }
+.fm-popup ul { list-style: none; margin: 0; padding: 0; }
+.fm-popup li { padding: 4px 0; border-top: 1px dotted var(--card-edge, rgba(255,255,255,.15)); font-size: .9rem; }
+.fm-food { cursor: pointer; color: var(--text); text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 3px; }
+.fm-food:hover { color: var(--accent); }
+.fm-rank { font-size: .75rem; color: var(--muted); white-space: nowrap; }
+.fm-rank.best { color: var(--accent); font-weight: 700; }
+.fm-hint { margin: 8px 0 0; font-size: .75rem; color: var(--muted); font-style: italic; }
+/* Themed tooltip. */
+#flavormap .fm-tooltip {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--primary); border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.45); font-size: .82rem;
+}
+#flavormap .fm-tooltip::before { display: none; }
+/* Themed zoom + attribution controls. */
+#flavormap .leaflet-bar a {
+  background: var(--surface); color: var(--text);
+  border-bottom: 1px solid var(--card-edge, rgba(255,255,255,.15));
+}
+#flavormap .leaflet-bar a:hover { background: var(--primary); color: var(--ink-on-primary, #060f21); }
+#flavormap .leaflet-control-attribution {
+  background: rgba(6,15,33,.72); color: var(--muted);
+  font-size: 10px; padding: 2px 8px; border-radius: 6px 0 0 0;
+}
+#flavormap .leaflet-control-attribution a { color: var(--accent); }
+/* Legend. */
+#fmLegend {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 10px 22px; margin: 22px auto 0; padding: 14px 20px;
+  background: var(--surface); border: 1px solid var(--card-edge, rgba(201,162,39,.35));
+  border-radius: 10px; max-width: 860px; color: var(--muted); font-size: .85rem;
+}
+.fm-scale { display: flex; align-items: flex-end; gap: 10px; }
+.fm-dot { display: inline-block; border-radius: 50%; border: 1.5px solid #d4af37; background: #123a6e; vertical-align: middle; }
+.fm-dot.s { width: 8px; height: 8px; }
+.fm-dot.m { width: 16px; height: 16px; }
+.fm-dot.l { width: 24px; height: 24px; }
+/* Graceful-failure message. */
+#fmFallback {
+  display: none; text-align: center; margin: 40px auto; padding: 36px 28px;
+  max-width: 640px; background: var(--surface);
+  border: 1px solid var(--primary); border-radius: 12px; color: var(--text);
+}
+#fmFallback a { color: var(--accent); font-weight: 700; }
+@media (max-width: 640px) {
+  #flavormap { height: 420px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html" class="current">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a>
+</nav>
+
+<header class="hero">
+  <p class="kicker">The World Food Encyclopedia</p>
+  <h1>The <span class="gold">Flavor Map</span></h1>
+  <p class="sub">Every dish in the encyclopedia, pinned where it comes from. Bigger pins mean more dishes — select any pin to see that place's top foods.</p>
+</header>
+
+<main class="fm-wrap">
+  <p class="fm-intro">Filter by region, or wander. Selecting a dish in a pin's list opens its full entry.</p>
+  <div id="fmFilters" role="group" aria-label="Filter map markers by region"></div>
+  <p id="fmStatus" aria-live="polite"></p>
+  <div id="flavormap" role="application" aria-label="Interactive map of dish origins"></div>
+  <div id="fmFallback" role="alert"></div>
+  <aside id="fmLegend" aria-label="Map legend">
+    <span><strong>Legend</strong></span>
+    <span class="fm-scale">
+      <span class="fm-dot s"></span><span class="fm-dot m"></span><span class="fm-dot l"></span>
+      <span>Marker size = number of dishes from that place</span>
+    </span>
+    <span>Select a marker to see its top dishes (ranked best first)</span>
+  </aside>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="data/photos.js"></script>
+<script src="tour.js"></script>
+<script src="theme.js"></script>
+<script src="cookbook.js"></script>
+<script src="fotd.js"></script>
+<script src="assistant.js"></script>
+<script src="cursor-glow.js"></script>
+<script src="recent.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="modal.js"></script>
+<script src="map.js"></script>
+</body>
+</html>
