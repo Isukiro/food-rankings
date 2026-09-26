@@ -43,7 +43,8 @@
   <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="cookbook.html">Cookbook</a>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
 </nav>
 
 <header class="hero">
@@ -67,6 +68,21 @@
   <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
   <p class="cap-note" id="searchCap" style="display:none"></p>
 </header>
+
+<aside class="sage-callout" aria-label="Meet Sage, your AI food guide">
+  <span class="sage-callout-emoji">🧑‍🍳</span>
+  <div><strong>Meet Sage — your AI food guide.</strong><br>Ask about any of the 1,203 foods, compare two dishes head-to-head, or learn how the rankings are scored.</div>
+  <button type="button" id="sageCalloutBtn">Ask Sage</button>
+</aside>
+
+<script>
+(function () {
+  var btn = document.getElementById('sageCalloutBtn');
+  if (btn) btn.addEventListener('click', function () {
+    if (typeof window.openSage === 'function') window.openSage();
+  });
+})();
+</script>
 
 <section class='home-section intro-cta' aria-label='New here'>
   <div class='section-head'>
