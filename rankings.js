@@ -92,6 +92,27 @@ var DEFAULTS = { tab: 'best', sort: 'score', category: 'all', region: 'all', tie
 var state = Object.assign({}, DEFAULTS);
 var compareSet = []; // food names, max 3
 
+/* ---------------- dad-proofing: pagination + view density ---------------- */
+var PAGE_SIZE = 25;
+state.page = 1;
+state.rankview = 'comfortable';
+try {
+  var _savedView = window.localStorage.getItem('fr_rankview');
+  if (_savedView === 'compact' || _savedView === 'comfortable') state.rankview = _savedView;
+} catch (e) { /* private mode: density just won't persist */ }
+
+/* Filter/tab/sort/search changes always jump back to page 1. */
+function refresh() {
+  state.page = 1;
+  writeStateToURL();
+  render();
+}
+
+function scrollLeaderboard() {
+  try { $('leaderboard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  catch (e) { /* noop */ }
+}
+
 function readStateFromURL() {
   var p = new URLSearchParams(window.location.search);
   var tab = p.get('tab');
@@ -344,7 +365,27 @@ function voteHTML(name) {
   return '<div class="vote-row">' + status + '<span class="vote-stars">' + btns + '</span></div>';
 }
 
+function rowHTMLCompact(f) {
+  /* Dense one-line-ish row for fast scanning: no photo, definition, research,
+   * pros/cons, flavor line, or voting stars. Compare checkboxes keep working. */
+  var s = (typeof f.score === 'number') ? f.score.toFixed(1) : '\u2013';
+  var html = '<article class="leader-row leader-compact" data-name="' + esc(f.name) +
+    '" data-food-name="' + esc(f.name) + '">';
+  html += '<div class="leader-rank">#' + f.rank + '</div>';
+  html += '<div class="leader-main">';
+  html += '<div class="leader-name">' + esc(f.emoji + ' ' + f.name) + '</div>';
+  html += '<div class="leader-sub">' + esc(f.origin) + ' \u00b7 ' + esc(f.category) + '</div>';
+  html += '<div class="leader-meta">';
+  html += '<span class="score-line">' + s + '/10</span>';
+  html += '<span class="tier-badge tier-' + f.tier + '" title="Tier ' + f.tier + '">' + f.tier + '</span>';
+  html += '<label class="compare-check"><input type="checkbox" class="compare-box" data-name="' +
+    esc(f.name) + '"' + (compareSet.indexOf(f.name) !== -1 ? ' checked' : '') + '> Compare</label>';
+  html += '</div></div></article>';
+  return html;
+}
+
 function rowHTML(f) {
+  if (state.rankview === 'compact') return rowHTMLCompact(f);
   var pc = prosConsFor(f.name);
   var photo = photoFor(f.name);
   // Category view rows carry badgeTab ('best'|'worst') and show the dish's
@@ -413,10 +454,10 @@ function render() {
   $('tierGroup').hidden = inCat;
   if (inCat) {
     renderChips('catViewChips', allCategories(), state.catView, function (v) {
-      state.catView = v; writeStateToURL(); render();
+      state.catView = v; refresh();
     });
     renderChips('regionChips', uniqueValues('region'), state.region, function (v) {
-      state.region = v; writeStateToURL(); render();
+      state.region = v; refresh();
     });
     renderCategoryView();
     renderCompareBar();
@@ -429,22 +470,33 @@ function render() {
   var filtered = applySort(applyFilters(all));
 
   renderChips('categoryChips', uniqueValues('category'), state.category, function (v) {
-    state.category = v; writeStateToURL(); render();
+    state.category = v; refresh();
   });
   renderChips('regionChips', uniqueValues('region'), state.region, function (v) {
-    state.region = v; writeStateToURL(); render();
+    state.region = v; refresh();
   });
   var tiers = tiersPresent(all);
   if (tiers.indexOf(state.tier) === -1 && state.tier !== 'all') state.tier = 'all';
   renderChips('tierChips', tiers, state.tier, function (v) {
-    state.tier = v; writeStateToURL(); render();
+    state.tier = v; refresh();
   });
+
+  syncViewToggle();
+
+  // pagination
+  var totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (state.page > totalPages) state.page = 1;
 
   // count
   var label = state.tab === 'best' ? 'best' : 'worst';
-  $('resultCount').textContent = filtered.length === all.length
-    ? 'Showing all ' + all.length + ' ' + label + ' dishes'
-    : 'Showing ' + filtered.length + ' of ' + all.length + ' ' + label + ' dishes';
+  if (filtered.length === 0) {
+    $('resultCount').textContent = 'No dishes match your filters.';
+  } else {
+    var s0 = (state.page - 1) * PAGE_SIZE + 1;
+    var s1 = Math.min(state.page * PAGE_SIZE, filtered.length);
+    $('resultCount').textContent = 'Showing ' + s0 + '\u2013' + s1 + ' of ' +
+      filtered.length + ' ' + label + ' dishes';
+  }
 
   // rows
   var board = $('leaderboard');
@@ -453,14 +505,46 @@ function render() {
       '<button type="button" class="gold-btn" id="clearFilters">Clear filters</button></div>';
     $('clearFilters').addEventListener('click', function () {
       state.category = 'all'; state.region = 'all'; state.tier = 'all'; state.q = '';
-      writeStateToURL(); render();
+      refresh();
     });
+    renderPageNav(0);
   } else {
-    board.innerHTML = filtered.map(rowHTML).join('');
+    var pageItems = filtered.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+    board.innerHTML = pageItems.map(rowHTML).join('');
+    renderPageNav(totalPages);
   }
 
   renderCompareBar();
   writeStateToURL();
+}
+
+/* ---------------- pagination ---------------- */
+
+function renderPageNav(totalPages) {
+  var nav = $('pageNav');
+  if (!nav) return;
+  if (totalPages <= 1) { nav.hidden = true; nav.innerHTML = ''; return; }
+  nav.hidden = false;
+  var cur = state.page;
+  function btn(label, page, cls, disabled, aria) {
+    return '<button type="button" class="page-btn' + (cls ? ' ' + cls : '') + '"' +
+      ' data-page="' + page + '"' + (disabled ? ' disabled' : '') +
+      (aria ? ' aria-label="' + aria + '"' : '') + '>' + label + '</button>';
+  }
+  var pages = [];
+  for (var p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || Math.abs(p - cur) <= 1) pages.push(p);
+  }
+  var html = btn('\u2039 Prev', cur - 1, '', cur <= 1, 'Previous page');
+  var prev = 0;
+  for (var i = 0; i < pages.length; i++) {
+    var pg = pages[i];
+    if (pg - prev > 1) html += '<span class="page-ellipsis" aria-hidden="true">\u2026</span>';
+    html += btn(String(pg), pg, pg === cur ? 'current' : '', false, 'Page ' + pg);
+    prev = pg;
+  }
+  html += btn('Next \u203a', cur + 1, '', cur >= totalPages, 'Next page');
+  nav.innerHTML = html;
 }
 
 /* ---------------- compare ---------------- */
@@ -551,17 +635,36 @@ function closeCompare() {
   document.body.style.overflow = '';
 }
 
+/* ---------------- view density ---------------- */
+
+function syncViewToggle() {
+  var comfort = $('viewComfort'), compact = $('viewCompact');
+  if (!comfort || !compact) return;
+  var isCompact = state.rankview === 'compact';
+  comfort.classList.toggle('active', !isCompact);
+  compact.classList.toggle('active', isCompact);
+  comfort.setAttribute('aria-pressed', !isCompact ? 'true' : 'false');
+  compact.setAttribute('aria-pressed', isCompact ? 'true' : 'false');
+}
+
+function setRankView(v) {
+  if (v !== 'compact' && v !== 'comfortable') return;
+  state.rankview = v;
+  try { window.localStorage.setItem('fr_rankview', v); } catch (e) { /* noop */ }
+  render();
+}
+
 /* ---------------- events ---------------- */
 
 function bindEvents() {
   $('tabBest').addEventListener('click', function () {
     if (state.view !== 'ranked' || state.tab !== 'best') {
-      state.view = 'ranked'; state.tab = 'best'; writeStateToURL(); render();
+      state.view = 'ranked'; state.tab = 'best'; refresh(); scrollLeaderboard();
     }
   });
   $('tabWorst').addEventListener('click', function () {
     if (state.view !== 'ranked' || state.tab !== 'worst') {
-      state.view = 'ranked'; state.tab = 'worst'; writeStateToURL(); render();
+      state.view = 'ranked'; state.tab = 'worst'; refresh(); scrollLeaderboard();
     }
   });
   $('tabCategory').addEventListener('click', function () {
@@ -570,11 +673,11 @@ function bindEvents() {
       // If the ranked view had a category filter on, carry it over as the viewed category.
       var carry = validCategory(state.category);
       if (carry) state.catView = carry;
-      writeStateToURL(); render();
+      refresh(); scrollLeaderboard();
     }
   });
   $('sortSelect').addEventListener('change', function (e) {
-    state.sort = e.target.value; writeStateToURL(); render();
+    state.sort = e.target.value; refresh();
   });
 
   var searchTimer = null;
@@ -582,7 +685,7 @@ function bindEvents() {
     clearTimeout(searchTimer);
     var v = e.target.value;
     searchTimer = setTimeout(function () {
-      state.q = v; writeStateToURL(); render();
+      state.q = v; refresh();
     }, 220);
   });
 
@@ -598,6 +701,38 @@ function bindEvents() {
       render();
     }
   });
+
+  var pageNav = $('pageNav');
+  if (pageNav) {
+    pageNav.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-page]') : null;
+      if (!b || b.disabled) return;
+      var p = parseInt(b.getAttribute('data-page'), 10);
+      if (!p || p === state.page) return;
+      state.page = p;
+      render();
+      scrollLeaderboard();
+    });
+  }
+
+  var viewComfort = $('viewComfort'), viewCompact = $('viewCompact');
+  if (viewComfort) viewComfort.addEventListener('click', function () { setRankView('comfortable'); });
+  if (viewCompact) viewCompact.addEventListener('click', function () { setRankView('compact'); });
+
+  /* Arrow keys move between tabs for keyboard users. */
+  var tabOrder = ['tabBest', 'tabWorst', 'tabCategory'];
+  var tablist = document.querySelector('.tabs');
+  if (tablist) {
+    tablist.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      var idx = tabOrder.indexOf(document.activeElement && document.activeElement.id);
+      if (idx === -1) return;
+      e.preventDefault();
+      var next = (idx + (e.key === 'ArrowRight' ? 1 : tabOrder.length - 1)) % tabOrder.length;
+      $(tabOrder[next]).focus();
+      $(tabOrder[next]).click();
+    });
+  }
 
   $('compareOpen').addEventListener('click', openCompare);
   $('compareClear').addEventListener('click', function () {
