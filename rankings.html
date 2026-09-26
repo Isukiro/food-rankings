@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Food Rankings — Best &amp; Worst Dishes on Earth">
 <meta property="og:description" content="The definitive ranking of the world's best and worst foods. Filter by category, region and tier, rate dishes yourself, and compare them side by side.">
-<meta property="og:url" content="https://globalfoodencyclopedia.example/rankings.html">
+<meta property="og:url" content="https://isukiro.github.io/food-rankings/rankings.html">
 <meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="modal.css">
@@ -94,13 +94,16 @@
 <header class="hero">
   <p class="kicker">The Leaderboard</p>
   <h1>Best &amp; <span class="gold">Worst</span> Foods on Earth</h1>
-  <p class="sub">Every ranked dish, scored out of 10 and graded into tiers — from Lechona at the very top to the dishes the world could not get behind. Filter, search, rate, and compare.</p>
-  <div class="tabs" role="tablist" aria-label="Ranking type">
-    <button type="button" class="tab" id="tabBest" role="tab" aria-selected="true">🏆 Best Foods</button>
-    <button type="button" class="tab" id="tabWorst" role="tab" aria-selected="false">🪦 Worst Foods</button>
-    <button type="button" class="tab" id="tabCategory" role="tab" aria-selected="false">📂 By Category</button>
-  </div>
+  <p class="sub">Every ranked dish, scored out of 10 and placed in tiers — from Lechona at the top of the Best list to the lowest-rated dishes on Earth. Filter, search, rate, and compare.</p>
 </header>
+
+<div class="tabs-wrap">
+  <div class="tabs" role="tablist" aria-label="Ranking type">
+    <button type="button" class="tab" id="tabBest" role="tab" aria-selected="true">Best Foods</button>
+    <button type="button" class="tab" id="tabWorst" role="tab" aria-selected="false">Worst Foods</button>
+    <button type="button" class="tab" id="tabCategory" role="tab" aria-selected="false">By Category</button>
+  </div>
+</div>
 
 <main>
   <div class="rank-controls">
@@ -112,6 +115,10 @@
         <option value="region">By region</option>
       </select>
     </label>
+    <div class="view-toggle" role="group" aria-label="Row density">
+      <button type="button" id="viewComfort" class="view-btn active" aria-pressed="true">Detailed</button>
+      <button type="button" id="viewCompact" class="view-btn" aria-pressed="false">Compact</button>
+    </div>
   </div>
 
   <div class="chip-group" id="catViewGroup" hidden>
@@ -134,6 +141,7 @@
 
   <p class="result-count" id="resultCount" aria-live="polite"></p>
   <div id="leaderboard"></div>
+  <div id="pageNav" class="page-nav" hidden></div>
 
   <section id="unrankedWrap" hidden aria-label="More dishes in this category">
     <h2 class="cat-section-title" id="unrankedTitle"></h2>
