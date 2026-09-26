@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rankings by Category — Top Desserts, Snacks, Street Food &amp; More | The Global Food Encyclopedia</title>
+<meta name="description" content="Browse the world's foods by category — top desserts, snacks, street food, mains, soups, seafood and more. Ordered by Food Rankings score; only TasteAtlas global ranks are official.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Rankings by Category — The Global Food Encyclopedia">
+<meta property="og:description" content="Top dishes in every category, ordered by Food Rankings score. Real global ranks only where TasteAtlas awarded them.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/tops.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="modal.css">
+<link rel="stylesheet" href="tops.css">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html" class="current">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
+</nav>
+
+<header class="hero">
+  <p class="kicker">By Category</p>
+  <h1 id="topsTitle">Rankings by <span class="gold">Category</span></h1>
+  <p class="sub" id="topsSub">Every kind of food, from desserts to street food — ordered by Food Rankings score. Pick a category to see its full leaderboard.</p>
+</header>
+
+<main>
+  <!-- Hub view: grid of category cards -->
+  <div id="hubView">
+    <div class="cat-hub" id="catHub"></div>
+  </div>
+
+  <!-- Category ranking view -->
+  <div id="catView" hidden>
+    <p class="back-link"><a href="tops.html">&larr; All categories</a></p>
+
+    <div class="honesty-note" role="note" aria-label="How this ranking works">
+      <strong>How this list is ordered:</strong> dishes with an official global rank
+      (TasteAtlas 100 Best Dishes 2025 or 100 Worst Rated Foods 2026) are sorted by
+      their <em>Food Rankings score</em> out of 10; unranked dishes follow alphabetically
+      and carry no score. The numbers at the left are <strong>positions in this
+      category list only — not official ranks</strong>. Only badges reading
+      &ldquo;Best in the World&rdquo; or &ldquo;Worst in the World&rdquo; are real global ranks.
+    </div>
+
+    <div class="rank-controls">
+      <input type="search" id="topsSearch" placeholder="Search this category…" aria-label="Search this category">
+      <label class="sort-label">Sort
+        <select id="topsSort" aria-label="Sort dishes">
+          <option value="score">By score</option>
+          <option value="name">A&ndash;Z</option>
+        </select>
+      </label>
+    </div>
+
+    <p class="result-count" id="topsCount" aria-live="polite"></p>
+    <div id="topsBoard"></div>
+  </div>
+</main>
+
+<div class="compare-bar" id="compareBar" hidden>
+  <span id="compareNote" role="status"></span>
+  <span id="compareNames"></span>
+  <button type="button" class="gold-btn" id="compareOpen">Compare (<span id="compareCount">0</span>)</button>
+  <button type="button" class="chip" id="compareClear">Clear</button>
+</div>
+
+<div class="compare-modal" id="compareModal" hidden>
+  <div class="compare-dialog" role="dialog" aria-modal="true" aria-label="Dish comparison">
+    <h2>Side-by-side comparison</h2>
+    <p class="sub" style="margin:6px 0 0">Scores, tiers and official ranks — head to head.</p>
+    <div id="compareBody"></div>
+    <p style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button type="button" class="chip" id="compareClose">✕ Close</button>
+      <a class="chip" href="rankings.html" style="text-decoration:none">Open the main Rankings page</a>
+    </p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="data/pros-cons.js"></script>
+<script src="data/photos.js"></script>
+<script src="modal.js"></script>
+<script src="recent.js"></script>
+<script src="theme.js"></script>
+<script src="tops.js"></script>
+<script src="assistant.js"></script>
+<script src="cursor-glow.js"></script>
+<script src="collections.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
+</body>
+</html>
