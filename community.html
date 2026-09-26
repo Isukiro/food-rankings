@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Community · Global Food Encyclopedia</title>
+<title>Community — The Global Food Encyclopedia</title>
 <meta name="description" content="Join the public discussion about foods from every continent — no account needed, post as a guest or anonymously. Your star ratings stay personal and private, in your own browser.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Community · Global Food Encyclopedia">
+<meta property="og:title" content="Community — The Global Food Encyclopedia">
 <meta property="og:description" content="Public discussion about foods from every continent. No account needed to comment; star ratings stay personal and private.">
 <meta property="og:url" content="https://isukiro.github.io/food-rankings/community.html">
 <meta property="og:site_name" content="The Global Food Encyclopedia">
@@ -20,25 +20,6 @@
 .community-wrap .lead { color: var(--text-soft); font-size: 1.1rem; line-height: 1.7; }
 .community-wrap .lead a { color: var(--accent); }
 
-.setup-banner {
-  background: var(--surface);
-  border: 2px solid var(--primary);
-  border-radius: 14px;
-  padding: 24px 28px;
-  margin: 28px 0 32px;
-  box-shadow: 0 0 24px rgba(212, 175, 55, 0.12);
-}
-.setup-banner h2 { color: var(--accent); font-size: 1.15rem; margin: 0 0 8px; letter-spacing: 0.02em; }
-.setup-banner > p { color: var(--text-soft); margin: 0 0 14px; line-height: 1.6; }
-.setup-banner ol { margin: 0; padding-left: 22px; color: var(--text); line-height: 1.9; }
-.setup-banner ol li::marker { color: var(--accent); font-weight: bold; }
-.setup-banner code {
-  background: var(--bg); color: var(--accent);
-  padding: 2px 8px; border-radius: 6px; font-size: 0.9em;
-  border: 1px solid var(--primary);
-}
-.setup-banner .note { margin-top: 14px; font-size: 0.95rem; color: var(--muted); }
-
 .comments-shell {
   background: var(--surface-2);
   border: 1px solid var(--primary);
@@ -48,7 +29,7 @@
 }
 .comments-shell h2 { color: var(--text); margin: 0 0 8px; }
 .comments-shell p { color: var(--muted); margin: 0 0 4px; line-height: 1.6; }
-.giscus-soon {
+.comments-soon {
   background: var(--bg);
   border: 1px dashed var(--primary);
   border-radius: 10px;
@@ -56,9 +37,9 @@
   text-align: center;
   margin-top: 18px;
 }
-.giscus-soon p { color: var(--text-soft); line-height: 1.65; margin: 0 0 8px; }
-.giscus-soon p:last-child { margin-bottom: 0; }
-.giscus-soon strong { color: var(--accent); }
+.comments-soon p { color: var(--text-soft); line-height: 1.65; margin: 0 0 8px; }
+.comments-soon p:last-child { margin-bottom: 0; }
+.comments-soon strong { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -100,17 +81,10 @@
   <h1>The <span class="gold">Community</span> Table</h1>
   <p class="lead">This is where visitors argue, agree, and swap food stories — out in the open.</p>
 
-  <!-- ============ SETUP CHECKLIST: comments go live only after the owner does these ============ -->
-  <section class="setup-banner" aria-label="Comment system setup checklist">
-    <h2>⚠ Comments aren't live yet — quick setup for the site owner</h2>
-    <p>Comments on this page run on <strong>Cusdis</strong> (free, lightweight, works on static hosting — and visitors can post <strong>with no account at all, even anonymously</strong>). To go live:</p>
-    <ol>
-      <li>Sign up at <a href="https://cusdis.com">cusdis.com</a> and add the website <code>isukiro.github.io/food-rankings</code>.</li>
-      <li>In the Cusdis dashboard, copy the <strong>App ID</strong> (anonymous/guest commenting is on by default).</li>
-      <li>Hand the <strong>App ID</strong> to the assistant — the embed below goes live with it.</li>
-    </ol>
-    <p class="note">Until then, the discussion area shows a "coming soon" card. New comments wait for your approval in the Cusdis dashboard, so no spam surprises.</p>
-  </section>
+  <!-- ============ SETUP CHECKLIST (owner-only): comments go live after the ============
+       owner adds her Cusdis App ID to #cusdisMount below and flips data-ready.
+       Full instructions are in the CUSDIS EMBED comment. Visitors only ever
+       see the "coming soon" card, never this note. ========================== -->
 
   <p class="lead">Two things look similar on this site but do very different jobs: the <strong>comments</strong> below are <em>public discussion</em> with other visitors — no account needed, post as a guest or anonymously, and everything you write is visible to everyone once approved. The <strong>star ratings</strong> you see on rankings and food pages are the opposite: they are <em>your personal scores</em>, stored only in your own browser, never uploaded, never shared.</p>
 
@@ -135,7 +109,7 @@
       var ready = mount.getAttribute('data-ready') === 'true'
         && appId.indexOf('SETUP-NEEDED') !== 0;
       if (!ready) {
-        mount.innerHTML = '<div class="giscus-soon">'
+        mount.innerHTML = '<div class="comments-soon">'
           + '<p><strong>💬 Comments open soon.</strong></p>'
           + '<p>The discussion table is still being set — check back shortly. '
           + 'Anyone will be able to post here, no account needed, even anonymously.</p>'
