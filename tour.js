@@ -98,29 +98,67 @@
     if (scrollWaiter) { clearInterval(scrollWaiter); scrollWaiter = null; }
   }
 
+  /* One seating pass: clear stale rings, draw fresh ones, park the card.
+     Synchronous, so a re-seat that changes nothing is visually a no-op. */
+  function seatStep() {
+    clearRings();
+    drawRings(currentTargets);
+    positionCard(currentTargets);
+  }
+
+  /* Does the current step's primary target actually need the page to scroll? */
+  function targetNeedsScroll() {
+    var t = currentTargets[0];
+    if (!t) return false;
+    try {
+      var r = t.getBoundingClientRect();
+      var vh = window.innerHeight || 0;
+      return (r.top < -40 || r.bottom > vh + 40);
+    } catch (e) { return false; }
+  }
+
+  var verifyTimer = null;
+  function clearVerifyTimer() {
+    if (verifyTimer) { clearTimeout(verifyTimer); verifyTimer = null; }
+  }
   /* Wait until the smooth auto-scroll has truly finished before measuring
-     element positions. Chromium defers the *start* of a smooth scroll by a
-     few frames, so we first wait until window.scrollY actually moves (the
-     scroll began), then until it stops moving (the scroll settled). If it
-     never starts (~800ms: nothing to scroll to, or an instant scroll), we
-     measure right away instead of hanging the tour. */
+     element positions. Chromium defers the *start* of a smooth scroll, so we
+     first wait until window.scrollY actually moves (the scroll began), then
+     until it stops moving (the scroll settled). When the target genuinely
+     needs scrolling we allow up to ~2s for the scroll to start; when it is
+     already on screen we measure almost immediately. */
   function waitScrollSettled(cb) {
     clearScrollWaiter();
+    var needScroll = targetNeedsScroll();
     var startY = (typeof window.scrollY === 'number') ? window.scrollY : 0;
     var lastY = startY, stable = 0, tries = 0, started = false;
+    var maxStartWait = needScroll ? 20 : 6;
     scrollWaiter = setInterval(function () {
       tries++;
       var y = (typeof window.scrollY === 'number') ? window.scrollY : 0;
       if (!started) {
         if (y !== startY) { started = true; lastY = y; stable = 0; }
-        else if (tries >= 8) { done(); return; }
+        else if (tries >= maxStartWait) { done(); return; }
       } else {
         if (y === lastY) { stable++; } else { stable = 0; lastY = y; }
         if (stable >= 2) { done(); return; }
       }
-      if (tries >= 40) done();
+      if (tries >= 50) done();
     }, 100);
     function done() { clearScrollWaiter(); cb(); }
+  }
+
+  /* Safety second pass: if the first seating raced a deferred smooth scroll
+     (measured while the target was still off-screen), the card sits in its
+     centered fallback with missing/misplaced rings. ~1.2s later the scroll
+     has surely finished, so re-seat once if we're still on the same step. */
+  function scheduleVerifySeat(idx) {
+    clearVerifyTimer();
+    verifyTimer = setTimeout(function () {
+      verifyTimer = null;
+      if (!tourOpen || currentStep !== idx) return;
+      seatStep();
+    }, 1200);
   }
 
   function storageGet(k) {
@@ -330,6 +368,8 @@
          coordinates — center it so the tour stays usable. */
       if (first.bottom < -40 || first.top > vh + 40) {
         card.classList.add('ft-centered');
+        card.style.left = '';
+        card.style.top = '';
         card.style.visibility = 'visible';
         return;
       }
@@ -402,16 +442,17 @@
 
     if (positionTimer) { clearTimeout(positionTimer); positionTimer = null; }
     clearScrollWaiter();
+    clearVerifyTimer();
 
     if (targets.length) {
       try { targets[0].scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* noop */ }
       waitScrollSettled(function () {
-        drawRings(targets);
-        positionCard(targets);
+        if (!tourOpen || currentStep !== idx) return;
+        seatStep();
+        scheduleVerifySeat(idx);
       });
     } else {
-      drawRings([]);
-      positionCard(null);
+      seatStep();
     }
 
     tourOpen = true;
@@ -423,6 +464,7 @@
     if (overlay) overlay.remove();
     if (positionTimer) { clearTimeout(positionTimer); positionTimer = null; }
     clearScrollWaiter();
+    clearVerifyTimer();
     disarmRelayout();
     tourOpen = false;
   }
