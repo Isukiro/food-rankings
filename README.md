@@ -1,6 +1,6 @@
 # The Global Food Rankings 🍕
 
-A fun, opinionated ranking of the **10 best** and **10 worst** foods in the world — a single-page website with tabs, scores, and medals.
+A fun, research-backed ranking of the **15 best** and **15 worst** foods in the world — a single-page website with tabs, medals, and the reasoning behind every rank.
 
 ## Files
 
