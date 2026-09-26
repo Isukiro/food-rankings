@@ -139,7 +139,7 @@
       + '<label class="fr-theme-field">Accent<input type="color" id="fr-theme-accent" value="#d4af37"></label>'
       + '</div>'
       + '<label class="fr-theme-toggle"><input type="checkbox" id="fr-theme-glow" checked>'
-      + '<span>Cursor glow<small>A soft light that follows your mouse</small></span></label>'
+      + '<span>Neon cursor<small>A neon ring that follows your mouse</small></span></label>'
       + '<div class="fr-theme-foot"><button type="button" class="fr-theme-reset">Reset to default</button></div>';
     document.body.appendChild(panel);
     return panel;
