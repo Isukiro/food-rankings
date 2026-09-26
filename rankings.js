@@ -52,6 +52,24 @@ function esc(s) {
 
 function $(id) { return document.getElementById(id); }
 
+/* Flavor tag pills for a dish (from tastes.js, guarded — skipped silently
+ * if the tastes data isn't loaded). Wrapped in a link to the flavor map. */
+function flavorPillsHTML(name) {
+  var t = (window.FOOD_TASTES || {})[name];
+  if (!t || !t.tags || !t.tags.length) return '';
+  var pills = t.tags.slice(0, 4).map(function (tag) {
+    return '<span class="flavor-pill">' + esc(tag) + '</span>';
+  }).join('');
+  return '<span class="flavor-label">Flavors</span>' + pills;
+}
+
+function flavorLineHTML(name) {
+  var pills = flavorPillsHTML(name);
+  return pills
+    ? '<a class="flavor-line" href="map.html" title="See it on the Flavor Map">' + pills + '</a>'
+    : '';
+}
+
 function getVotes() {
   try {
     return JSON.parse(localStorage.getItem('fr_votes') || '{}') || {};
@@ -259,6 +277,7 @@ function unrankedCardHTML(f) {
   html += '<h3>' + esc(f.name) + '</h3>';
   html += '<p class="unranked-sub">' + esc(f.origin) + ' · ' + esc(f.region) + '</p>';
   html += '<span class="unranked-tag">Unranked</span>';
+  html += flavorLineHTML(f.name);
   if (f.definition) html += '<p class="unranked-def">' + esc(f.definition) + '</p>';
   html += '</article>';
   return html;
@@ -353,6 +372,7 @@ function rowHTML(f) {
   html += '<label class="compare-check"><input type="checkbox" class="compare-box" data-name="' + esc(f.name) + '"' +
     (compareSet.indexOf(f.name) !== -1 ? ' checked' : '') + '> Compare</label>';
   html += '</div>';
+  html += flavorLineHTML(f.name);
   if (f.definition) html += '<p class="leader-def">' + esc(f.definition) + '</p>';
   if (f.research) html += '<p class="leader-res"><strong>Why it ranks:</strong> ' + esc(f.research) + '</p>';
   if (pc) {
