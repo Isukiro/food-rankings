@@ -254,7 +254,7 @@ function catViewFilter(list) {
 }
 
 function unrankedCardHTML(f) {
-  var html = '<article class="unranked-card">';
+  var html = '<article class="unranked-card" data-food-name="' + esc(f.name) + '">';
   html += '<div class="unranked-emoji" aria-hidden="true">' + esc(f.emoji) + '</div>';
   html += '<h3>' + esc(f.name) + '</h3>';
   html += '<p class="unranked-sub">' + esc(f.origin) + ' · ' + esc(f.region) + '</p>';
@@ -336,7 +336,7 @@ function rowHTML(f) {
     ? (btab === 'worst' ? '#' + f.rank + ' Worst in the World' : '★ #' + f.rank + ' Best in the World')
     : ('#' + f.rank + (state.tab === 'worst' ? ' Worst' : ' Best'));
 
-  var html = '<article class="leader-row" data-name="' + esc(f.name) + '">';
+  var html = '<article class="leader-row" data-name="' + esc(f.name) + '" data-food-name="' + esc(f.name) + '">';
   html += '<div class="leader-rank">#' + f.rank + '</div>';
   if (photo) {
     html += '<img class="leader-photo" src="' + esc(photo) + '" alt="Photo of ' + esc(f.name) +
