@@ -1,6 +1,6 @@
 # The Global Food Rankings 🍕
 
-A fun, research-backed ranking of the **15 best** and **15 worst** foods in the world — a single-page website with tabs, medals, and the reasoning behind every rank.
+A research-backed ranking of the **30 best** and **30 worst** foods in the world — following TasteAtlas's real global rankings, with the reasoning behind every rank, plus a search box.
 
 ## Files
 
