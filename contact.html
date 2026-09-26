@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit a Pick — The Global Food Encyclopedia</title>
+<meta name="description" content="Think a dish deserves a ranking? Submit your pick to The Global Food Encyclopedia — tell us the food, its origin, and why the world should know it.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Submit a Pick — The Global Food Encyclopedia">
+<meta property="og:description" content="Think a dish deserves a ranking? Tell us the food, its origin, and why the world should know it.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/contact.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html" class="current">Contact</a>
+</nav>
+
+<header class="page-head">
+  <p class="kicker">The World Food Encyclopedia</p>
+  <h1>Submit a <span class="gold">Pick</span></h1>
+  <p class="sub">Think a dish deserves a ranking the world hasn't given it yet? Make your case. The best submissions get featured in our Editor's Picks.</p>
+</header>
+
+<main class="form-wrap">
+  <form class="submit-form" id="pickForm" novalidate>
+    <div class="form-field">
+      <label class="form-label" for="fName">Your name</label>
+      <input class="form-input" id="fName" name="name" type="text" placeholder="e.g. Irena" required>
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="fFood">Food name</label>
+      <input class="form-input" id="fFood" name="food" type="text" placeholder="e.g. Bánh Mì" required>
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="fOrigin">Origin / country</label>
+      <input class="form-input" id="fOrigin" name="origin" type="text" placeholder="e.g. Vietnam" required>
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="fWhy">Why it deserves a ranking</label>
+      <textarea class="form-textarea" id="fWhy" name="why" placeholder="What makes it special? Its history, its flavor, why the world is sleeping on it…" required></textarea>
+    </div>
+    <button type="submit" class="gold-btn" style="padding: 14px 34px;">Submit my pick</button>
+    <p class="form-note">This is a static site — submissions are saved in your browser; use the email option to actually reach us.</p>
+    <div class="form-confirm" id="formConfirm" role="status"></div>
+  </form>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script>
+(function () {
+  var form = document.getElementById("pickForm");
+  var confirmBox = document.getElementById("formConfirm");
+  // TODO: replace with the real editorial address before launch.
+  var EDITOR_EMAIL = "editor@globalfoodencyclopedia.example";
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("fName").value.trim();
+    var food = document.getElementById("fFood").value.trim();
+    var origin = document.getElementById("fOrigin").value.trim();
+    var why = document.getElementById("fWhy").value.trim();
+    if (!name || !food || !origin || !why) {
+      confirmBox.className = "form-confirm show";
+      confirmBox.innerHTML = "<strong>Almost there.</strong> Please fill in every field before submitting — we want the full pitch.";
+      return;
+    }
+
+    var submission = {
+      name: name,
+      food: food,
+      origin: origin,
+      why: why,
+      date: new Date().toISOString()
+    };
+    var existing = [];
+    try {
+      existing = JSON.parse(localStorage.getItem("fr_submissions") || "[]");
+    } catch (err) { existing = []; }
+    existing.push(submission);
+    try {
+      localStorage.setItem("fr_submissions", JSON.stringify(existing));
+    } catch (err) { /* storage unavailable; still show the email path */ }
+
+    var subject = "Food submission: " + food + " (" + origin + ")";
+    var body = "Name: " + name + "\nFood: " + food + "\nOrigin: " + origin + "\n\nWhy it deserves a ranking:\n" + why;
+    var mailto = "mailto:" + EDITOR_EMAIL
+      + "?subject=" + encodeURIComponent(subject)
+      + "&body=" + encodeURIComponent(body);
+
+    confirmBox.className = "form-confirm show";
+    confirmBox.innerHTML =
+      "<strong>Saved!</strong> Your pick for <strong>" + escapeHtml(food) + "</strong> is stored in this browser. "
+      + "Because this is a static site, it won't reach us until you send it — "
+      + "click below to open your email app with everything prefilled:<br>"
+      + '<a class="email-link" href="' + mailto + '">✉️ Send via email instead</a>';
+    form.reset();
+  });
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>
