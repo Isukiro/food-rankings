@@ -53,6 +53,33 @@
   var tourOpen = false;
   var positionTimer = null;
   var scrollWaiter = null;
+  var currentTargets = [];
+  var relayoutObs = null, relayoutTimer = null;
+
+  /* Late layout shifts (the Food of the Day teaser rendering, images
+     loading) can move a target after we positioned on it. While the tour is
+     open, watch for body resizes and quietly re-seat the rings + card on the
+     current step — without re-scrolling, so it never fights the user. */
+  function relayoutCurrentStep() {
+    if (!tourOpen) return;
+    drawRings(currentTargets);
+    positionCard(currentTargets);
+  }
+  function armRelayout() {
+    if (relayoutObs || typeof ResizeObserver === 'undefined') return;
+    try {
+      relayoutObs = new ResizeObserver(function () {
+        if (!tourOpen) return;
+        if (relayoutTimer) clearTimeout(relayoutTimer);
+        relayoutTimer = setTimeout(relayoutCurrentStep, 250);
+      });
+      relayoutObs.observe(document.body);
+    } catch (e) { relayoutObs = null; }
+  }
+  function disarmRelayout() {
+    if (relayoutTimer) { clearTimeout(relayoutTimer); relayoutTimer = null; }
+    if (relayoutObs) { try { relayoutObs.disconnect(); } catch (e) {} relayoutObs = null; }
+  }
 
   /* Keep only targets that are actually rendered (some ids, e.g. #fotdCard,
      appear multiple times when a template + live copy coexist). */
@@ -71,22 +98,29 @@
     if (scrollWaiter) { clearInterval(scrollWaiter); scrollWaiter = null; }
   }
 
-  /* Wait until the smooth auto-scroll actually settles before measuring
-     element positions. The old fixed 380ms timeout measured mid-scroll and
-     could park the card thousands of pixels off-screen, killing the tour. */
+  /* Wait until the smooth auto-scroll has truly finished before measuring
+     element positions. Chromium defers the *start* of a smooth scroll by a
+     few frames, so we first wait until window.scrollY actually moves (the
+     scroll began), then until it stops moving (the scroll settled). If it
+     never starts (~800ms: nothing to scroll to, or an instant scroll), we
+     measure right away instead of hanging the tour. */
   function waitScrollSettled(cb) {
     clearScrollWaiter();
-    var lastY = (typeof window.scrollY === 'number') ? window.scrollY : 0;
-    var stable = 0, tries = 0;
+    var startY = (typeof window.scrollY === 'number') ? window.scrollY : 0;
+    var lastY = startY, stable = 0, tries = 0, started = false;
     scrollWaiter = setInterval(function () {
       tries++;
       var y = (typeof window.scrollY === 'number') ? window.scrollY : 0;
-      if (y === lastY) { stable++; } else { stable = 0; lastY = y; }
-      if (stable >= 2 || tries >= 22) {
-        clearScrollWaiter();
-        cb();
+      if (!started) {
+        if (y !== startY) { started = true; lastY = y; stable = 0; }
+        else if (tries >= 8) { done(); return; }
+      } else {
+        if (y === lastY) { stable++; } else { stable = 0; lastY = y; }
+        if (stable >= 2) { done(); return; }
       }
-    }, 120);
+      if (tries >= 40) done();
+    }, 100);
+    function done() { clearScrollWaiter(); cb(); }
   }
 
   function storageGet(k) {
@@ -254,10 +288,14 @@
   function drawRings(targets) {
     var overlay = document.getElementById(OVERLAY_ID);
     if (!overlay) return;
+    var vh = window.innerHeight || 0, vw = window.innerWidth || 0;
     var frag = document.createDocumentFragment();
     for (var i = 0; i < targets.length; i++) {
       var r = targets[i].getBoundingClientRect();
       if (r.width === 0 && r.height === 0) continue;
+      /* Skip targets that are off-screen: a ring around something the user
+         can't see is worse than no ring at all. */
+      if (r.bottom < -40 || r.top > vh + 40 || r.right < -40 || r.left > vw + 40) continue;
       var ring = document.createElement('div');
       ring.className = 'ft-ring';
       ring.style.left = (r.left - 8) + 'px';
@@ -287,6 +325,14 @@
 
     if (targets && targets.length && vw > 720) {
       var first = targets[0].getBoundingClientRect();
+      /* If the target isn't actually on screen (the scroll didn't happen or
+         the layout shifted under us), never park the card at stale
+         coordinates — center it so the tour stays usable. */
+      if (first.bottom < -40 || first.top > vh + 40) {
+        card.classList.add('ft-centered');
+        card.style.visibility = 'visible';
+        return;
+      }
       var left = Math.max(16, Math.min(first.left, vw - cardW - 16));
       var below = first.bottom + 24;
       var above = first.top - cardH - 24;
@@ -352,6 +398,7 @@
       } catch (e) { targets = []; }
     }
     targets = visibleTargets(targets);
+    currentTargets = targets;
 
     if (positionTimer) { clearTimeout(positionTimer); positionTimer = null; }
     clearScrollWaiter();
@@ -376,10 +423,12 @@
     if (overlay) overlay.remove();
     if (positionTimer) { clearTimeout(positionTimer); positionTimer = null; }
     clearScrollWaiter();
+    disarmRelayout();
     tourOpen = false;
   }
 
   function startFoodTour() {
+    armRelayout();
     showStep(0);
   }
 
