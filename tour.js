@@ -5,33 +5,47 @@
   'use strict';
 
   var STORE_KEY = 'fr_tour_seen';
+  var NOPLAY_KEY = 'fr_tour_noautoplay';
   var OVERLAY_ID = 'food-tour-overlay';
   var REPLAY_ID = 'tourReplay';
 
+  /* ~60-second homepage tour, written for a first-time, non-technical visitor.
+   * Every selector below was verified against index.html — keep it that way. */
   var STEPS = [
     {
-      title: 'Search any food',
-      body: 'Type any dish, snack or drink — 900+ foods with definitions and research.',
+      title: 'Start with the menus',
+      body: 'Everything on the site lives in three menus up top: Explore for rankings and maps, Community for your shelf, Help for Sage and this tour.',
+      selector: '.nav-group'
+    },
+    {
+      title: 'Search all 1,203 foods',
+      body: 'Type any dish, craving, or country here — matching foods appear as you type.',
       selector: '#searchInput'
     },
     {
-      title: 'Browse the Top 100 rankings',
-      body: 'The Rankings page holds the Top 100 Best and Top 100 Worst, scored out of 10 with S-to-F tiers.',
+      title: 'Food of the Day',
+      body: 'One new dish every day. Tap this card to open the full showcase with its photo and story.',
+      selector: '#fotdCard'
+    },
+    {
+      title: 'Filter in one tap',
+      body: 'Tap the Category or Region chips to narrow the list — try Dessert, or Asia.',
+      selector: '#searchCatChips'
+    },
+    {
+      title: 'The official Rankings',
+      body: 'The Top 100 Best and Top 100 Worst foods on Earth, each scored out of 10 with an S-to-F tier.',
       link: { href: 'rankings.html', label: 'Open the Rankings' }
     },
     {
-      title: 'Filter by category & region',
-      body: 'Narrow by Dessert, Snack, Street Food… or by continent.',
-      selector: '.chip-group'
+      title: 'Vote and compare',
+      body: 'On the Rankings page, tap the stars to rate any dish, or tick Compare on up to three dishes to see them side by side.',
+      link: { href: 'rankings.html', label: 'Try it now' }
     },
     {
-      title: 'Vote & compare foods',
-      body: 'Rate dishes with stars and tick up to three for a side-by-side comparison.'
-    },
-    {
-      title: 'Submit your own pick',
-      body: 'Know a dish we missed? Suggest it on the Contact page.',
-      link: { href: 'contact.html', label: 'Go to Contact' }
+      title: 'Meet Sage',
+      body: 'Stuck or curious? Tap the chef button in the corner any time and ask Sage about any food.',
+      selector: '#sage-fab'
     }
   ];
 
@@ -63,9 +77,9 @@
         'background:linear-gradient(90deg,transparent,var(--gold,#c9a227),transparent);}' +
       '.ft-step-count{font-size:.72rem;letter-spacing:3px;text-transform:uppercase;' +
         'color:var(--gold-bright,#d4af37);margin:0 0 8px;font-weight:600;}' +
-      '.ft-card h2{font-family:Georgia,"Times New Roman",serif;font-size:1.55rem;font-weight:600;' +
+      '.ft-card h2{font-family:Georgia,"Times New Roman",serif;font-size:1.65rem;font-weight:600;' +
         'letter-spacing:.4px;color:var(--cream,#f2ecdc);margin:0 0 10px;line-height:1.3;}' +
-      '.ft-body{color:#c3ccdd;font-size:.98rem;line-height:1.65;margin:0 0 6px;}' +
+      '.ft-body{color:#c3ccdd;font-size:1.06rem;line-height:1.65;margin:0 0 6px;}' +
       '.ft-link-wrap{margin:14px 0 2px;}' +
       '.ft-link{display:inline-block;font-family:Georgia,serif;font-weight:700;font-size:.95rem;' +
         'letter-spacing:.4px;color:var(--gold-bright,#d4af37);text-decoration:none;' +
@@ -85,10 +99,14 @@
         'color:#101c34;font-family:Georgia,serif;font-weight:700;font-size:.95rem;letter-spacing:.4px;' +
         'padding:11px 30px;transition:all .18s;}' +
       '.ft-next:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,162,39,.35);}' +
-      '.ft-skip-top{position:absolute;top:12px;right:16px;background:none;border:none;' +
-        'color:var(--muted,#93a1bd);font-size:.8rem;letter-spacing:1px;text-transform:uppercase;' +
-        'cursor:pointer;font-family:inherit;}' +
-      '.ft-skip-top:hover{color:var(--cream,#f2ecdc);text-decoration:underline;}';
+      '.ft-skip-top{position:absolute;top:10px;right:12px;cursor:pointer;font-family:inherit;' +
+        'background:rgba(201,162,39,.12);border:1px solid var(--gold,#c9a227);' +
+        'color:var(--cream,#f2ecdc);font-size:.88rem;letter-spacing:.4px;' +
+        'padding:9px 18px;border-radius:999px;}' +
+      '.ft-skip-top:hover{background:var(--gold,#c9a227);color:#101c34;}' +
+      '.ft-noauto{display:flex;align-items:center;gap:8px;justify-content:center;' +
+        'margin-top:18px;font-size:.82rem;color:var(--muted,#93a1bd);cursor:pointer;}' +
+      '.ft-noauto input{accent-color:#c9a227;width:16px;height:16px;cursor:pointer;}';
     var style = document.createElement('style');
     style.id = 'food-tour-styles';
     style.type = 'text/css';
@@ -113,7 +131,7 @@
     var skip = document.createElement('button');
     skip.type = 'button';
     skip.className = 'ft-skip-top';
-    skip.textContent = 'Skip tour';
+    skip.textContent = '✕ Skip tour';
     skip.addEventListener('click', finishTour);
 
     var count = document.createElement('p');
@@ -162,6 +180,21 @@
     actions.appendChild(back);
     actions.appendChild(next);
 
+    var noauto = document.createElement('label');
+    noauto.className = 'ft-noauto';
+    var noautoBox = document.createElement('input');
+    noautoBox.type = 'checkbox';
+    noautoBox.checked = !!storageGet(NOPLAY_KEY);
+    noautoBox.setAttribute('aria-label', "Don't auto-play this tour");
+    noautoBox.addEventListener('change', function () {
+      if (noautoBox.checked) storageSet(NOPLAY_KEY, '1');
+      else { try { window.localStorage.removeItem(NOPLAY_KEY); } catch (e) { /* noop */ } }
+    });
+    var noautoText = document.createElement('span');
+    noautoText.textContent = "Don't auto-play this tour";
+    noauto.appendChild(noautoBox);
+    noauto.appendChild(noautoText);
+
     card.appendChild(skip);
     card.appendChild(count);
     card.appendChild(title);
@@ -169,6 +202,7 @@
     card.appendChild(linkWrap);
     card.appendChild(dots);
     card.appendChild(actions);
+    card.appendChild(noauto);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     return overlay;
@@ -344,7 +378,7 @@
         history.replaceState(null, '', location.pathname + location.search);
       }
     } catch (e) { /* file:// may reject replaceState; harmless */ }
-    if (isHomePage() && (!storageGet(STORE_KEY) || viaLink)) {
+    if (isHomePage() && (viaLink || !storageGet(NOPLAY_KEY))) {
       setTimeout(function () { startFoodTour(); }, 600);
     }
   }
