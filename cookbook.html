@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Cookbook | The Global Food Encyclopedia</title>
+<meta name="description" content="Your personal cookbook — every dish you saved with a tap of the heart, kept in this browser. Revisit your favorite foods from around the world.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="My Cookbook | The Global Food Encyclopedia">
+<meta property="og:description" content="Your saved dishes from the Global Food Encyclopedia — a personal shortlist of the world's best (and most memorable) foods.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/cookbook.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .remove-btn { margin-top: 18px; padding: 10px 24px; }
+  #cookbookGrid { margin-top: 26px; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html" class="current">Cookbook</a>
+</nav>
+
+<header class="page-head">
+  <p class="kicker">Saved by you</p>
+  <h1>My <span class="gold">Cookbook</span></h1>
+  <p class="sub">Every dish you tap the 🤍 on is kept here, in this browser — your personal shortlist for the next craving, dinner party, or debate about the best food on Earth.</p>
+</header>
+
+<main>
+  <div class="grid" id="cookbookGrid"></div>
+  <p class="empty" id="cookbookEmpty" style="display:none">Your cookbook is empty — tap the 🤍 on any dish to save it here.</p>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="theme.js"></script>
+<script src="cookbook.js"></script>
+<script src="tour.js"></script>
+<script>
+/* Cookbook page: render saved foods from FOODS matching localStorage 'fr_favs'. */
+(function () {
+  function getFavs() {
+    try {
+      var v = JSON.parse(localStorage.getItem('fr_favs') || '[]');
+      return Array.isArray(v) ? v : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setFavs(list) {
+    try {
+      localStorage.setItem('fr_favs', JSON.stringify(list));
+    } catch (e) { /* private mode: favorites just won't persist */ }
+  }
+
+  function escAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  }
+
+  function cardHTML(f) {
+    return '<article class="card">'
+      + '<div class="emoji">' + f.emoji + '</div>'
+      + '<h3>' + f.name + '</h3>'
+      + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
+      + '<div class="cat-row"><span class="cat-tag">' + f.category + '</span></div>'
+      + '<p class="definition">' + f.definition + '</p>'
+      + '<button type="button" class="gold-btn remove-btn" data-name="' + escAttr(f.name) + '">Remove</button>'
+      + '</article>';
+  }
+
+  function render() {
+    var grid = document.getElementById('cookbookGrid');
+    var empty = document.getElementById('cookbookEmpty');
+    var favs = getFavs();
+    var foods = (typeof FOODS === 'undefined' ? [] : FOODS.filter(function (f) {
+      return favs.indexOf(f.name) !== -1;
+    }));
+    // keep the order the dishes were saved in
+    foods.sort(function (a, b) { return favs.indexOf(a.name) - favs.indexOf(b.name); });
+    grid.innerHTML = foods.map(cardHTML).join('');
+    empty.style.display = foods.length ? 'none' : 'block';
+    grid.style.display = foods.length ? '' : 'none';
+  }
+
+  document.getElementById('cookbookGrid').addEventListener('click', function (e) {
+    var btn = (e.target && e.target.closest) ? e.target.closest('.remove-btn') : null;
+    if (!btn) return;
+    var name = btn.getAttribute('data-name');
+    setFavs(getFavs().filter(function (n) { return n !== name; }));
+    render();
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+})();
+</script>
+</body>
+</html>
