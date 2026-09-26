@@ -350,26 +350,16 @@
     var origins = Object.keys(CENTROIDS).filter(function (o) { return dishesOf(o).length > 0; });
 
     var map = L.map("flavormap", { worldCopyJump: true, zoomControl: true }).setView([20, 10], 2);
-    var osmTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    });
-    var darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    /* Tile layer: CARTO's dark basemap (© OpenStreetMap contributors © CARTO).
+     * We deliberately do NOT use tile.openstreetmap.org directly — those are
+     * volunteer-run servers with a strict usage policy, and they block
+     * embedded use like this. CARTO serves the same OSM data from its own
+     * infrastructure and permits it with attribution; the dark style also
+     * suits the site's navy theme. */
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    });
-    osmTiles.addTo(map);
-    /* If OSM tiles are blocked on this network, fall back to CARTO's dark
-     * tiles (which suit the navy theme anyway) after a few failures. */
-    var tileErrors = 0, tilesSwapped = false;
-    osmTiles.on("tileerror", function () {
-      if (tilesSwapped || ++tileErrors < 8) return;
-      tilesSwapped = true;
-      try {
-        map.removeLayer(osmTiles);
-        darkTiles.addTo(map);
-      } catch (e) { /* noop */ }
-    });
+    }).addTo(map);
 
     /* Nudge exact duplicate centroids apart (e.g. "USA" vs "United States",
      * "Hawaii" vs "Hawaii, USA") so overlapping markers stay clickable. */
