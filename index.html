@@ -8,9 +8,9 @@
 </head>
 <body>
 <header class="hero">
-  <p class="kicker">A totally scientific* ranking</p>
+  <p class="kicker">A Global Culinary Compendium</p>
   <h1>The Global Food Rankings</h1>
-  <p class="sub">30 best and 30 worst foods in the world — ranked using real global rankings (TasteAtlas, CNN, UNESCO), each with the research behind its rank.</p>
+  <p class="sub">One hundred best and one hundred worst foods in the world — ranked from real global rankings, filterable by category, each with the research behind its rank.</p>
   <div class="search-wrap">
     <input id="search" type="text" placeholder="Search any food… (try 'curry' or 'Sweden')" autocomplete="off">
   </div>
@@ -23,18 +23,20 @@
 <main>
   <section id="best" class="board active">
     <div class="board-head">
-      <h2>The 30 Best Foods on Earth</h2>
+      <h2>The 100 Best Foods on Earth</h2>
       <p>Following TasteAtlas's 100 Best Dishes ranking — and the research says why.</p>
     </div>
+    <div class="chips" id="bestChips"></div>
     <div class="grid" id="bestGrid"></div>
     <p class="empty" id="bestEmpty" style="display:none">No foods match your search. Try another craving.</p>
   </section>
 
   <section id="worst" class="board">
     <div class="board-head">
-      <h2>The 30 Worst Foods on Earth</h2>
+      <h2>The 100 Worst Foods on Earth</h2>
       <p>Following TasteAtlas's 100 Worst Rated Foods — legendary dishes, for all the wrong reasons.</p>
     </div>
+    <div class="chips" id="worstChips"></div>
     <div class="grid" id="worstGrid"></div>
     <p class="empty" id="worstEmpty" style="display:none">No foods match your search. Lucky you.</p>
   </section>
