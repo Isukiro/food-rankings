@@ -17,13 +17,22 @@ function rankBadge(f) {
   return "";
 }
 
+function flavorPillsHTML(name) {
+  const t = (window.FOOD_TASTES || {})[name];
+  if (!t || !t.tags || !t.tags.length) return "";
+  const pills = t.tags.slice(0, 4).map(tag => `<span class="flavor-pill">${tag}</span>`).join("");
+  return `<span class="flavor-label">Flavors</span>${pills}`;
+}
+
 function cardHTML(f, rankLabel) {
+  const flavors = flavorPillsHTML(f.name);
   return `<article class="card">
     ${rankLabel ? `<div class="rank">${rankLabel}</div>` : ""}
     <div class="emoji">${f.emoji}</div>
     <h3>${f.name}</h3>
     <div class="origin">${f.origin} · ${f.region}</div>
     <div class="cat-row"><span class="cat-tag">${f.category}</span>${rankBadge(f)}</div>
+    ${flavors ? `<a class="flavor-line" href="map.html" title="See it on the Flavor Map">${flavors}</a>` : ""}
     <p class="definition">${f.definition}</p>
     <div class="research"><strong>Research:</strong> ${f.research}</div>
   </article>`;
