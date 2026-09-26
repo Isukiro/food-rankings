@@ -288,19 +288,19 @@
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
   var GREETINGS = [
-    'Hey there! I\u2019m <strong>Sage</strong> 🧑‍🍳, your food guide. Ask me about any dish, who\u2019s topping the rankings, or how this whole site works.',
-    'Hello! <strong>Sage</strong> 🧑‍🍳 here — I know all 1,203 foods in this encyclopedia. What are you craving to learn about?',
-    'Hey! I\u2019m <strong>Sage</strong> 🧑‍🍳. Ask me about a dish, the rankings, flavors, or how the site works.'
+    'Welcome — I\u2019m <strong>Sage</strong> 🧑‍🍳, your food guide. Ask me about any dish, the ranking leaders, or how this encyclopedia works.',
+    'Hello. <strong>Sage</strong> 🧑‍🍳 here — I know all 1,203 foods in this encyclopedia. What would you like to explore?',
+    'Good to see you. I\u2019m <strong>Sage</strong> 🧑‍🍳 — ask me about a dish, the rankings, flavors, or anything about this site.'
   ];
   var FALLBACKS = [
-    'Hmm, I didn\u2019t quite catch that. I\u2019m best with food questions — try one of these:',
-    'That one sailed past me! I shine brightest on food questions — how about one of these?',
-    'Not sure I followed. Point me at a dish, a craving, or a country and I\u2019ll take it from there:'
+    'I\u2019m afraid I didn\u2019t quite catch that. I\u2019m at my best with food questions — perhaps try one of these:',
+    'That one is outside my expertise, I\u2019m afraid. I can help best with food questions — for instance:',
+    'I\u2019m not certain I follow. Name a dish, a craving, or a country, and I\u2019ll take it from there:'
   ];
   var RECO_INTROS = [
-    'If I had to feed you right now, I\u2019d go with:',
-    'Alright, consulting my taste buds… here\u2019s what I\u2019d serve you:',
-    'Say no more — dinner is decided:'
+    'If I may make a suggestion:',
+    'A few recommendations, if you\u2019re hungry:',
+    'Allow me to suggest:'
   ];
 
   function foodCardHTML(f) {
@@ -413,14 +413,14 @@
 
   function intentTiers() {
     return {
-      html: '<p><strong>Tiers</strong> are just score brackets, like a report card:</p><ul class="sage-list">'
-        + '<li><strong>S</strong> — 9.5+ (legends)</li>'
-        + '<li><strong>A</strong> — 8.5+ (elite)</li>'
-        + '<li><strong>B</strong> — 7.5+ (excellent)</li>'
-        + '<li><strong>C</strong> — 5.0+ (solid)</li>'
-        + '<li><strong>D</strong> — 2.5+ (rough)</li>'
-        + '<li><strong>F</strong> — below 2.5 (approach with caution ⚠️)</li>'
-        + '</ul><p>Unranked dishes show “–” instead of a tier.</p>',
+      html: '<p><strong>Tiers</strong> are simply score brackets:</p><ul class="sage-list">'
+        + '<li><strong>S</strong> — 9.5 and above: exceptional</li>'
+        + '<li><strong>A</strong> — 8.5 and above: outstanding</li>'
+        + '<li><strong>B</strong> — 7.5 and above: excellent</li>'
+        + '<li><strong>C</strong> — 5.0 and above: respectable</li>'
+        + '<li><strong>D</strong> — 2.5 and above: below par</li>'
+        + '<li><strong>F</strong> — below 2.5: not recommended</li>'
+        + '</ul><p>Dishes without an official rank show “–” instead of a tier.</p>',
       chips: ['How are foods scored?', 'Worst foods?']
     };
   }
@@ -841,7 +841,7 @@
 
   function answerFor(rawText) {
     var raw = String(rawText || '').trim();
-    if (!raw) return { html: '<p>Ask me about any food — e.g. “tell me about tacos” — or tap a suggestion below. 👇</p>', chips: OPEN_CHIPS };
+    if (!raw) return { html: '<p>Ask me about any food — for example, “tell me about tacos” — or choose a suggestion below.</p>', chips: OPEN_CHIPS };
     var tl = norm(raw);
 
     /* strip a leading greeting and keep going ("hi, tell me about tacos") */
@@ -872,7 +872,7 @@
     else if ((r = intentShortLookup(tl))) {}
     else r = { html: '<p>' + pick(FALLBACKS) + '</p>', chips: ['Tell me about kimchi', 'Top 5 snacks?', 'Something crunchy'] };
 
-    if (greeted && r && !/greet/i.test(r.html)) r.html = '<p>Hey! 👋</p>' + r.html;
+    if (greeted && r && !/greet/i.test(r.html)) r.html = '<p>Hello.</p>' + r.html;
     return r;
   }
 
@@ -940,7 +940,7 @@
       setTimeout(function () {
         var ans;
         try { ans = answerFor(t); }
-        catch (e) { ans = { html: '<p>Something hiccuped in my kitchen — try asking again?</p>', chips: OPEN_CHIPS }; }
+        catch (e) { ans = { html: '<p>Something went wrong on my end — please try asking again.</p>', chips: OPEN_CHIPS }; }
         typing.innerHTML = ans.html;
         renderChips(ans.chips);
         scrollDown();
@@ -953,7 +953,7 @@
       fab.classList.toggle('open', opened);
       if (opened) {
         if (!msgs.children.length) {
-          addMsg('bot', '<p>Hey! I\u2019m <strong>Sage</strong> 🧑‍🍳 — I know all 1,203 foods in this encyclopedia. Ask me anything, or start here:</p>');
+          addMsg('bot', '<p>Welcome — I\u2019m <strong>Sage</strong> 🧑‍🍳, your food guide. I know all 1,203 foods in this encyclopedia. Ask me anything, or begin here:</p>');
           renderChips(OPEN_CHIPS);
         }
         setTimeout(function () { input.focus(); }, 150);
@@ -995,7 +995,7 @@
           var tip = document.createElement('div');
           tip.id = 'sage-tip';
           tip.setAttribute('role', 'status');
-          tip.innerHTML = '👋 <strong>Meet Sage</strong> — your AI food guide.<br>Ask me about any dish!';
+          tip.innerHTML = '<strong>Meet Sage</strong> — your food guide.<br>Ask about any dish, any time.';
           document.body.appendChild(tip);
           var dismiss = function () {
             if (tip.parentNode) tip.parentNode.removeChild(tip);
