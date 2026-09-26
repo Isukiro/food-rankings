@@ -4,81 +4,286 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Global Food Encyclopedia — Search Every Food on Earth</title>
+<meta name="description" content="Search hundreds of dishes, snacks, desserts and drinks from every continent — with definitions, real TasteAtlas global rankings, and the research behind every rank.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Global Food Encyclopedia — Search Every Food on Earth">
+<meta property="og:description" content="Hundreds of dishes from every continent, with definitions, global rankings, and the research behind them. Taste is personal.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/index.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Top 10 Best Foods on Earth (TasteAtlas 2025)",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Lechona"},
+    {"@type": "ListItem", "position": 2, "name": "Pizza Napoletana"},
+    {"@type": "ListItem", "position": 3, "name": "Picanha"},
+    {"@type": "ListItem", "position": 4, "name": "Rechta"},
+    {"@type": "ListItem", "position": 5, "name": "Phanaeng Curry"},
+    {"@type": "ListItem", "position": 6, "name": "Asado"},
+    {"@type": "ListItem", "position": 7, "name": "Çökertme Kebabı"},
+    {"@type": "ListItem", "position": 8, "name": "Rawon"},
+    {"@type": "ListItem", "position": 9, "name": "Cağ Kebabı"},
+    {"@type": "ListItem", "position": 10, "name": "Tibs"}
+  ]
+}
+</script>
+
 </head>
 <body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html" class="current">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a>
+</nav>
+
 <header class="hero">
   <p class="kicker">The World Food Encyclopedia</p>
   <h1>Every Food on Earth, <span class="gold">Explained</span></h1>
   <p class="sub">Search hundreds of dishes, snacks, desserts and drinks from every continent — with definitions, real global rankings, and the research behind them.</p>
-  <div class="tabs">
-    <button class="tab active" data-tab="search">🔍 Food Search</button>
-    <button class="tab" data-tab="best">🏆 Top 100 Best</button>
-    <button class="tab" data-tab="worst">👎 Top 100 Worst</button>
+  <div class="search-hero">
+    <input id="searchInput" type="text" placeholder="Search any food… (try 'dumpling', 'chocolate' or 'Japan')" autocomplete="off">
+    <button id="surpriseBtn" class="gold-btn">🎲 Surprise me</button>
   </div>
+  <div class="chip-group">
+    <span class="chip-label">Category</span>
+    <div class="chips" id="searchCatChips"></div>
+  </div>
+  <div class="chip-group">
+    <span class="chip-label">Region</span>
+    <div class="chips" id="searchRegionChips"></div>
+  </div>
+  <p class="result-count" id="searchCount"></p>
+  <div class="grid" id="searchGrid"></div>
+  <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
+  <p class="cap-note" id="searchCap" style="display:none"></p>
 </header>
 
 <main>
-  <section id="search" class="board active">
-    <div class="search-hero">
-      <input id="searchInput" type="text" placeholder="Search any food… (try 'dumpling', 'chocolate' or 'Japan')" autocomplete="off">
-      <button id="surpriseBtn" class="gold-btn">🎲 Surprise me</button>
+  <section class="home-section" aria-label="Trending Now">
+    <div class="section-head">
+      <h2>Trending Now</h2>
+      <p>A taste of the two lists everyone argues about. Full Top 100s live on the Rankings page.</p>
     </div>
-    <div class="chip-group">
-      <span class="chip-label">Category</span>
-      <div class="chips" id="searchCatChips"></div>
+    <div class="trending-grid">
+      <div class="trending-col">
+        <h3>🏆 Top 10 Best</h3>
+        <p class="col-sub">TasteAtlas 100 Best Dishes, 2025 · scores mapped to a 10-point scale</p>
+        <ul class="preview-list" id="bestPreview"></ul>
+        <a class="see-all" href="rankings.html">See the full Top 100 →</a>
+      </div>
+      <div class="trending-col">
+        <h3>👎 Top 10 Worst</h3>
+        <p class="col-sub">TasteAtlas 100 Worst Rated Foods, 2026 · scores mapped to a 10-point scale</p>
+        <ul class="preview-list" id="worstPreview"></ul>
+        <a class="see-all" href="rankings.html">See the full Top 100 →</a>
+      </div>
     </div>
-    <div class="chip-group">
-      <span class="chip-label">Region</span>
-      <div class="chips" id="searchRegionChips"></div>
-    </div>
-    <p class="result-count" id="searchCount"></p>
-    <div class="grid" id="searchGrid"></div>
-    <p class="empty" id="searchEmpty" style="display:none">No foods match. Try another craving.</p>
   </section>
 
-  <section id="best" class="board">
-    <div class="board-head">
-      <h2>The 100 Best Foods on Earth</h2>
-      <p>Following TasteAtlas's 100 Best Dishes ranking — with definitions and the research behind each rank.</p>
+  <section class="home-section" aria-label="Editor's Picks">
+    <div class="section-head">
+      <h2>Editor's Picks</h2>
+      <p>Six foods our editor keeps thinking about — personal tasting notes, not official rankings.</p>
     </div>
-    <div class="chip-group">
-      <span class="chip-label">Category</span>
-      <div class="chips" id="bestCatChips"></div>
-    </div>
-    <div class="chip-group">
-      <span class="chip-label">Region</span>
-      <div class="chips" id="bestRegionChips"></div>
-    </div>
-    <p class="result-count" id="bestCount"></p>
-    <div class="grid" id="bestGrid"></div>
-    <p class="empty" id="bestEmpty" style="display:none">No foods match your filters.</p>
+    <div class="picks-grid" id="picksGrid"></div>
   </section>
 
-  <section id="worst" class="board">
-    <div class="board-head">
-      <h2>The 100 Worst Foods on Earth</h2>
-      <p>Following TasteAtlas's 100 Worst Rated Foods — legendary dishes, for all the wrong reasons.</p>
+  <section class="home-section" aria-label="Latest Reviews">
+    <div class="section-head">
+      <h2>Latest Reviews</h2>
+      <p>Editor's reviews: subjective, strongly worded, and open to argument.</p>
     </div>
-    <div class="chip-group">
-      <span class="chip-label">Category</span>
-      <div class="chips" id="worstCatChips"></div>
-    </div>
-    <div class="chip-group">
-      <span class="chip-label">Region</span>
-      <div class="chips" id="worstRegionChips"></div>
-    </div>
-    <p class="result-count" id="worstCount"></p>
-    <div class="grid" id="worstGrid"></div>
-    <p class="empty" id="worstEmpty" style="display:none">No foods match your filters. Lucky you.</p>
+    <div class="reviews-grid" id="reviewsGrid"></div>
   </section>
 </main>
 
-<footer>
-  <p>Built with ❤️ and strong opinions. Rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal — disagree loudly.</p>
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
 </footer>
 
 <script src="data/foods.js"></script>
-<script src="script.js"></script>
+<script src="data/photos.js"></script>
+<script>
+/* Homepage: food search engine + trending previews + editor's picks + latest reviews. */
+(function () {
+  var state = { q: "", cat: "All", region: "All" };
+  var MAX_RESULTS = 60;
+
+  function scoreOf(f) {
+    if (f.bestRank) return (10 - (f.bestRank - 1) * (3.5 / 99)).toFixed(1);
+    if (f.worstRank) return (3.5 - (f.worstRank - 1) * (2.5 / 99)).toFixed(1);
+    return null;
+  }
+
+  function rankBadge(f) {
+    if (f.bestRank) return ' <span class="rank-badge best">★ #' + f.bestRank + ' Best</span>';
+    if (f.worstRank) return ' <span class="rank-badge worst">#' + f.worstRank + ' Worst</span>';
+    return "";
+  }
+
+  function cardHTML(f) {
+    return '<article class="card">'
+      + '<div class="emoji">' + f.emoji + '</div>'
+      + '<h3>' + f.name + '</h3>'
+      + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
+      + '<div class="cat-row"><span class="cat-tag">' + f.category + '</span>' + rankBadge(f) + '</div>'
+      + '<p class="definition">' + f.definition + '</p>'
+      + '<div class="research"><strong>Research:</strong> ' + f.research + '</div>'
+      + '</article>';
+  }
+
+  function matchesFilters(f) {
+    if (state.cat !== "All" && f.category !== state.cat) return false;
+    if (state.region !== "All" && f.region !== state.region) return false;
+    if (state.q) {
+      var q = state.q.toLowerCase().trim();
+      var hay = (f.name + " " + f.origin + " " + f.region + " " + f.category + " " + f.definition + " " + f.research).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+
+  function buildChips(containerId, values, key) {
+    var el = document.getElementById(containerId);
+    var html = ['<button class="chip active" data-value="All">All</button>'];
+    values.forEach(function (v) {
+      html.push('<button class="chip" data-value="' + v + '">' + v + '</button>');
+    });
+    el.innerHTML = html.join("");
+    el.addEventListener("click", function (e) {
+      if (!e.target.classList.contains("chip")) return;
+      el.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+      e.target.classList.add("active");
+      state[key] = e.target.getAttribute("data-value");
+      renderSearch();
+    });
+  }
+
+  function renderSearch() {
+    var list = FOODS.filter(matchesFilters);
+    var shown = list.slice(0, MAX_RESULTS);
+    document.getElementById("searchGrid").innerHTML = shown.map(cardHTML).join("");
+    document.getElementById("searchEmpty").style.display = list.length ? "none" : "block";
+    document.getElementById("searchCount").textContent =
+      list.length ? ("Found " + list.length + " food" + (list.length === 1 ? "" : "s")) : "";
+    var cap = document.getElementById("searchCap");
+    if (list.length > MAX_RESULTS) {
+      cap.style.display = "block";
+      cap.textContent = "Showing the first " + MAX_RESULTS + " of " + list.length + " matches — refine your search to see more.";
+    } else {
+      cap.style.display = "none";
+    }
+  }
+
+  function renderPreview(listId, list, isBest) {
+    var el = document.getElementById(listId);
+    el.innerHTML = list.map(function (f) {
+      var rank = isBest ? f.bestRank : f.worstRank;
+      return '<li class="preview-row">'
+        + '<span class="preview-rank">#' + rank + '</span>'
+        + '<span class="preview-name"><a href="rankings.html">' + f.emoji + ' ' + f.name + '</a></span>'
+        + '<span class="preview-score">' + scoreOf(f) + '/10</span>'
+        + '</li>';
+    }).join("");
+  }
+
+  var PICKS = [
+    { name: "Pizza Napoletana",
+      review: "In this editor's opinion, the strongest argument for a world #1 crown — and the data almost agrees, with TasteAtlas voters placing it at #2. The research cites the UNESCO-recognized art of the pizzaiuolo and a formula from 1889: leopard-spotted crust from a 450°C wood oven, San Marzano tomatoes, fior di latte, basil. Simple ingredients, obsessive technique — the benchmark every other pizza on Earth is judged against." },
+    { name: "Sushi",
+      review: "Editor's take: the most remarkable glow-up in food history. The research traces sushi from Edo-period street food to what is arguably the world's most prestigious cuisine — a transformation built on the itamae's craft of rice, knife work, and timing. It is fast food that learned patience, and no other cuisine rewards attention to detail quite like this one." },
+    { name: "Croissant",
+      review: "One editor's humble submission: the perfect breakfast does not exist, but this is close. Our research notes its ancestor is the Austrian kipferl — France simply made it its own emblem. A proper one, as the entry says, shatters into dozens of buttery layers. Flaky outside, cloud-soft inside; accept no doughy imitations." },
+    { name: "Kimchi",
+      review: "Editor's opinion: the single most accomplished condiment on the planet. Per our research, it is the soul of Korean cuisine — families traditionally gather for kimjang, the communal autumn kimchi-making — and its fermentation science and cultural weight earned UNESCO heritage recognition. Tangy, spicy, alive, and doing quiet work for your gut." },
+    { name: "Hákarl",
+      review: "Editor's verdict: I respect it, and I never want to be in a room with it. Ranked #22 worst in the world, it is fermented Greenland shark that, as our research puts it, reeks of ammonia — Anthony Bourdain called it the single worst thing he ever ate. It began as Viking-era food safety (the shark is poisonous fresh) and, as the entry notes, never got repealed. A legend, for all the wrong reasons." },
+    { name: "Balut",
+      review: "Editor's honest review: I admire the Philippines for this one from a safe distance. #23 on the worst list, it is a fertilized duck egg — veins, beak, and all — beloved at home as beer food and a stamina snack. Our research notes the texture surprise ruins most first-timers, which is exactly how a dish becomes the reality-TV dare of legend." }
+  ];
+
+  function renderPicks() {
+    var el = document.getElementById("picksGrid");
+    el.innerHTML = PICKS.map(function (p) {
+      var f = FOODS.find(function (x) { return x.name === p.name; });
+      if (!f) return "";
+      var photo = (typeof PHOTOS !== "undefined" && PHOTOS[p.name])
+        ? '<img class="pick-photo" src="' + PHOTOS[p.name] + '" data-photo-for="' + p.name + '" alt="' + p.name + '" loading="lazy" onerror="this.remove()">'
+        : "";
+      return '<article class="card pick-card">'
+        + photo
+        + '<div class="pick-emoji-fallback">' + f.emoji + '</div>'
+        + '<h3>' + f.name + '</h3>'
+        + '<div class="origin">' + f.origin + ' · ' + f.region + '</div>'
+        + '<div class="cat-row"><span class="cat-tag">' + f.category + '</span>' + rankBadge(f) + '</div>'
+        + '<div class="pick-review"><span class="pick-kicker">Editor\u2019s pick</span>' + p.review + '</div>'
+        + '</article>';
+    }).join("");
+  }
+
+  var REVIEWS = [
+    { title: "The Whole Pig That Conquered the World", food: "Lechona", stars: 5, date: "September 24, 2026",
+      body: "Editor's review: the actual #1 dish in the world on TasteAtlas's 2025 list, and honestly, I get it. A whole pig roasted for hours, stuffed with rice, peas, and spices, until the skin turns to crackling and the meat falls apart. It is Colombia's celebration centerpiece — weddings, festivals, the works. Eating it feels like being handed the keys to a party you did nothing to deserve." },
+    { title: "A Nation-Building Noodle", food: "Pad Thai", stars: 5, date: "September 20, 2026",
+      body: "Editor's review: ranked #55 best in the world, but as an ambassador it punches like #1. Rice noodles wok-tossed in tamarind, fish sauce, and palm sugar — our research reminds us this was a 1930s nation-building dish that became Thailand's global calling card. Sweet, sour, salty, crunchy in every single bite. It never misses; it only varies in how hard it wins." },
+    { title: "Ammonia, but Make It Heritage", food: "Hákarl", stars: 2, date: "September 15, 2026",
+      body: "Editor's review: two stars for audacity, zero for pleasure. The research does not exaggerate — fermented Greenland shark genuinely reeks of ammonia, and it sits at #22 on the worst list for a reason. But here's the thing: it is also a Viking-era food-safety solution that fed people through winters that would kill you. I respect it the way I respect a blizzard: from indoors." },
+    { title: "The Black Soup Worth the Stain", food: "Rawon", stars: 4, date: "September 10, 2026",
+      body: "Editor's review: #8 best in the world and the dish that will convert the most skeptics on this list. East Java's beef soup gets its ink-black color and deep earthy funk from keluak nuts — it looks intimidating and tastes like comfort with a secret. It loses one star only because you will never get the smell out of your kitchen. Worth it. Completely worth it." }
+  ];
+
+  function renderReviews() {
+    var el = document.getElementById("reviewsGrid");
+    el.innerHTML = REVIEWS.map(function (r) {
+      var f = FOODS.find(function (x) { return x.name === r.food; });
+      var foodLine = f ? (f.emoji + " " + f.name + " — " + f.origin) : r.food;
+      var stars = "\u2605".repeat(r.stars) + "\u2606".repeat(5 - r.stars);
+      return '<article class="card review-card">'
+        + '<h3 class="review-title">' + r.title + '</h3>'
+        + '<div class="review-meta">' + foodLine + ' · <span class="stars">' + stars + '</span> · ' + r.date + '</div>'
+        + '<div class="review-body"><p>' + r.body + '</p></div>'
+        + '</article>';
+    }).join("");
+  }
+
+  // init
+  var categories = Array.from(new Set(FOODS.map(function (f) { return f.category; }))).sort();
+  var regions = Array.from(new Set(FOODS.map(function (f) { return f.region; }))).sort();
+  buildChips("searchCatChips", categories, "cat");
+  buildChips("searchRegionChips", regions, "region");
+  document.getElementById("searchInput").addEventListener("input", function (e) {
+    state.q = e.target.value;
+    renderSearch();
+  });
+  document.getElementById("surpriseBtn").addEventListener("click", function () {
+    var f = FOODS[Math.floor(Math.random() * FOODS.length)];
+    state.q = ""; state.cat = "All"; state.region = "All";
+    document.getElementById("searchInput").value = "";
+    document.querySelectorAll("#searchCatChips .chip, #searchRegionChips .chip").forEach(function (c) {
+      c.classList.toggle("active", c.getAttribute("data-value") === "All");
+    });
+    document.getElementById("searchGrid").innerHTML = cardHTML(f);
+    document.getElementById("searchEmpty").style.display = "none";
+    document.getElementById("searchCount").textContent = "🎲 A surprise for you: " + f.name;
+    document.getElementById("searchCap").style.display = "none";
+    document.getElementById("searchGrid").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  renderSearch();
+  var best10 = FOODS.filter(function (f) { return f.bestRank && f.bestRank <= 10; })
+    .sort(function (a, b) { return a.bestRank - b.bestRank; });
+  var worst10 = FOODS.filter(function (f) { return f.worstRank && f.worstRank <= 10; })
+    .sort(function (a, b) { return a.worstRank - b.worstRank; });
+  renderPreview("bestPreview", best10, true);
+  renderPreview("worstPreview", worst10, false);
+  renderPicks();
+  renderReviews();
+})();
+</script>
 </body>
 </html>
