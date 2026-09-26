@@ -546,6 +546,45 @@
       send(input.value);
       input.value = '';
     });
+
+    /* Public opener: nav links, hero buttons, etc. call window.openSage(). */
+    function openSage() {
+      if (!opened) fab.click();
+      else { try { input.focus(); } catch (e) {} }
+    }
+    if (typeof window !== 'undefined') window.openSage = openSage;
+
+    /* "Ask Sage" nav link (present in the site nav on every page). */
+    var navLink = document.getElementById('sage-nav-link');
+    if (navLink) {
+      navLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        openSage();
+      });
+    }
+
+    /* One-time nudge so first-time visitors discover Sage. */
+    try {
+      if (!localStorage.getItem('sage_nudged')) {
+        setTimeout(function () {
+          if (opened || document.getElementById('sage-tip')) return;
+          fab.classList.add('sage-nudge');
+          var tip = document.createElement('div');
+          tip.id = 'sage-tip';
+          tip.setAttribute('role', 'status');
+          tip.innerHTML = '👋 <strong>Meet Sage</strong> — your AI food guide.<br>Ask me about any dish!';
+          document.body.appendChild(tip);
+          var dismiss = function () {
+            if (tip.parentNode) tip.parentNode.removeChild(tip);
+            fab.classList.remove('sage-nudge');
+            try { localStorage.setItem('sage_nudged', '1'); } catch (e2) {}
+          };
+          tip.addEventListener('click', dismiss);
+          fab.addEventListener('click', dismiss, { once: true });
+          setTimeout(dismiss, 14000);
+        }, 2600);
+      }
+    } catch (e) { /* storage unavailable; skip nudge */ }
   }
 
   if (typeof document !== 'undefined') {
