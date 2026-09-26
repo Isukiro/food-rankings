@@ -618,18 +618,14 @@ background:var(--primary);color:#1a1405;font-size:1rem}
 }
 
 /* ================= Neon cursor ================= */
-#cursor-glow{position:fixed;top:0;left:0;width:38px;height:38px;margin:-19px 0 0 -19px;
-border-radius:50%;pointer-events:none;z-index:9990;opacity:0;transition:opacity .35s ease;
+#cursor-glow{position:fixed;top:0;left:0;width:40px;height:40px;margin:-20px 0 0 -20px;
+pointer-events:none;z-index:9990;opacity:0;transition:opacity .3s ease;will-change:transform}
+#cursor-glow.on{opacity:1}
+#cursor-glow-ring{width:100%;height:100%;border-radius:50%;
 border:2px solid var(--accent,#d4af37);
 box-shadow:0 0 10px var(--accent,#d4af37),
 0 0 26px color-mix(in srgb,var(--accent,#d4af37) 55%,transparent),
 inset 0 0 8px color-mix(in srgb,var(--accent,#d4af37) 60%,transparent)}
-#cursor-glow.on{opacity:.95}
-#cursor-glow.pulse{animation:cursor-pulse .32s ease}
-@keyframes cursor-pulse{0%{scale:1}40%{scale:1.65}100%{scale:1}}
-#cursor-dot{position:fixed;top:0;left:0;width:6px;height:6px;margin:-3px 0 0 -3px;
-border-radius:50%;pointer-events:none;z-index:9990;opacity:0;transition:opacity .35s ease;
-background:var(--accent,#d4af37);
-box-shadow:0 0 8px var(--accent,#d4af37),0 0 16px var(--accent,#d4af37)}
-#cursor-dot.on{opacity:1}
-@media (prefers-reduced-motion:reduce){#cursor-glow,#cursor-dot{display:none}}
+#cursor-glow-ring.pulse{animation:cursor-pulse .35s ease}
+@keyframes cursor-pulse{0%{transform:scale(1)}40%{transform:scale(1.6)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){#cursor-glow{display:none}}
