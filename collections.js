@@ -27,6 +27,17 @@
   var KIND_LABEL = { fav: "Favorites", try: "Want to Try", tried: "Tried It" };
   var KIND_GLYPH = { fav: "♥", try: "★", tried: "✓" };
 
+  /* Change listeners: lets optional integrations (e.g. cloud sync in
+   * auth.js) react to Shelf mutations without polling. */
+  var changeListeners = [];
+  var suppressEmit = false;
+  function emitChange() {
+    if (suppressEmit) return;
+    changeListeners.slice().forEach(function (cb) {
+      try { cb(); } catch (e) { /* listener errors must never break Shelf */ }
+    });
+  }
+
   function read(key, fallback) {
     try {
       var raw = localStorage.getItem(key);
@@ -58,6 +69,7 @@
       if (i === -1) list.push(name);
       else list.splice(i, 1);
       write(KEYS[kind], list);
+      emitChange();
       return i === -1; // true when the food was added
     },
     has: function (name, kind) {
@@ -80,6 +92,7 @@
         list.push(name);
         if (list.length > cap) list = list.slice(list.length - cap);
         write(KEYS.viewed, list);
+        emitChange();
       }
     },
     exploredCount: function () { return asList(read(KEYS.viewed, [])).length; },
@@ -97,6 +110,7 @@
       r = (r && typeof r === "object" && !Array.isArray(r)) ? r : {};
       r[name] = stars;
       write(KEYS.myratings, r);
+      emitChange();
       return true;
     },
     getRating: function (name) {
@@ -160,6 +174,41 @@
       Object.keys(KEYS).forEach(function (k) {
         try { localStorage.removeItem(KEYS[k]); } catch (e) { /* noop */ }
       });
+      emitChange();
+    },
+
+    /* ---- change notifications + bulk import (used by cloud sync) ---- */
+    onChange: function (cb) {
+      if (typeof cb === "function") changeListeners.push(cb);
+    },
+    /* Overwrite local lists/ratings with a snapshot shaped like
+     * { fav, try, tried, viewed, myratings }. Missing fields are left
+     * untouched. Returns true on success. */
+    importData: function (data) {
+      if (!data || typeof data !== "object") return false;
+      suppressEmit = true;
+      try {
+        if (data.fav !== undefined) write(KEYS.fav, asList(data.fav));
+        if (data.try !== undefined) write(KEYS.try, asList(data.try));
+        if (data.tried !== undefined) write(KEYS.tried, asList(data.tried));
+        if (data.viewed !== undefined) write(KEYS.viewed, asList(data.viewed));
+        if (data.myratings !== undefined) {
+          var r = {};
+          var src = data.myratings;
+          if (src && typeof src === "object" && !Array.isArray(src)) {
+            Object.keys(src).forEach(function (k) {
+              var v = Number(src[k]);
+              if (v >= 1 && v <= 5) r[k] = Math.round(v);
+            });
+          }
+          write(KEYS.myratings, r);
+        }
+      } finally {
+        suppressEmit = false;
+      }
+      emitChange();
+      Shelf.refreshButtons(document);
+      return true;
     }
   };
 
