@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Family Tree — The Global Food Encyclopedia</title>
+<meta name="description" content="Explore how dishes connect: pick any food and see its family tree of related dishes across the Global Food Encyclopedia.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Food Family Tree — The Global Food Encyclopedia">
+<meta property="og:description" content="Pick any food and see its family tree of related dishes.">
+<meta property="og:url" content="https://isukiro.github.io/food-rankings/tree.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="tree.css">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
+</nav>
+
+<main class="tree-wrap">
+  <header class="tree-hero">
+    <p class="tree-eyebrow">Connections</p>
+    <h1>Food Family Tree</h1>
+    <p class="tree-sub">Every dish has relatives. Pick a food and trace its family — if you like one, you'll probably love its kin.</p>
+  </header>
+
+  <section class="tree-controls" aria-label="Choose a food">
+    <label class="tree-search-label" for="treeSearch">Start with a dish</label>
+    <div class="tree-search-row">
+      <input id="treeSearch" type="text" list="treeFoodList" placeholder="Type a food name, e.g. Picanha…" autocomplete="off">
+      <datalist id="treeFoodList"></datalist>
+      <button id="treeGo" class="tree-go-btn" type="button">Grow tree</button>
+    </div>
+    <p class="tree-hint">Tip: drag to pan, use the buttons to zoom. Click any dish to open its full page.</p>
+  </section>
+
+  <section class="tree-stage" aria-label="Family tree diagram">
+    <div class="tree-zoom" role="group" aria-label="Zoom controls">
+      <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
+      <button id="zoomOut" type="button" aria-label="Zoom out">−</button>
+      <button id="zoomReset" type="button" aria-label="Reset view">Reset</button>
+    </div>
+    <svg id="treeSvg" viewBox="0 0 1000 700" role="img" aria-label="Food family tree diagram">
+      <g id="treeCanvas"></g>
+    </svg>
+    <p class="tree-empty" id="treeEmpty" hidden>Choose a dish above to grow its family tree.</p>
+  </section>
+
+  <section class="tree-legend" aria-label="Legend">
+    <span class="legend-item"><span class="legend-dot legend-root"></span>Your dish</span>
+    <span class="legend-item"><span class="legend-dot legend-l1"></span>Close relatives</span>
+    <span class="legend-item"><span class="legend-dot legend-l2"></span>Extended family</span>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="food-relations.js"></script>
+<script src="tree.js"></script>
+<script src="theme.js"></script>
+<script src="assistant.js"></script>
+<script src="collections.js"></script>
+<script src="food-link.js"></script>
+<script src="delight.js"></script>
+</body>
+</html>
