@@ -73,6 +73,7 @@
   <div class="tabs" role="tablist" aria-label="Ranking type">
     <button type="button" class="tab" id="tabBest" role="tab" aria-selected="true">🏆 Best Foods</button>
     <button type="button" class="tab" id="tabWorst" role="tab" aria-selected="false">🪦 Worst Foods</button>
+    <button type="button" class="tab" id="tabCategory" role="tab" aria-selected="false">📂 By Category</button>
   </div>
 </header>
 
@@ -88,7 +89,12 @@
     </label>
   </div>
 
-  <div class="chip-group">
+  <div class="chip-group" id="catViewGroup" hidden>
+    <span class="chip-label">Browse a category</span>
+    <div class="chips" id="catViewChips"></div>
+  </div>
+
+  <div class="chip-group" id="catFilterGroup">
     <span class="chip-label">Category</span>
     <div class="chips" id="categoryChips"></div>
   </div>
@@ -96,13 +102,18 @@
     <span class="chip-label">Region</span>
     <div class="chips" id="regionChips"></div>
   </div>
-  <div class="chip-group">
+  <div class="chip-group" id="tierGroup">
     <span class="chip-label">Tier</span>
     <div class="chips" id="tierChips"></div>
   </div>
 
   <p class="result-count" id="resultCount" aria-live="polite"></p>
   <div id="leaderboard"></div>
+
+  <section id="unrankedWrap" hidden aria-label="More dishes in this category">
+    <h2 class="cat-section-title" id="unrankedTitle"></h2>
+    <div class="unranked-grid" id="unrankedGrid"></div>
+  </section>
 </main>
 
 <div class="compare-bar" id="compareBar" hidden>
