@@ -70,7 +70,7 @@ function setVote(name, stars) {
 
 /* ---------------- state + URL sync ---------------- */
 
-var DEFAULTS = { tab: 'best', sort: 'score', category: 'all', region: 'all', tier: 'all', q: '' };
+var DEFAULTS = { tab: 'best', sort: 'score', category: 'all', region: 'all', tier: 'all', q: '', view: 'ranked', catView: 'Dessert' };
 var state = Object.assign({}, DEFAULTS);
 var compareSet = []; // food names, max 3
 
@@ -80,20 +80,46 @@ function readStateFromURL() {
   state.tab = tab === 'worst' ? 'worst' : 'best';
   var sort = p.get('sort');
   state.sort = sort === 'name' || sort === 'region' ? sort : 'score';
-  state.category = p.get('category') || 'all';
   state.region = p.get('region') || 'all';
   state.tier = p.get('tier') || 'all';
   state.q = p.get('q') || '';
+  // Category view: ?view=category&category=X (category doubles as the viewed category)
+  state.view = p.get('view') === 'category' ? 'category' : 'ranked';
+  if (state.view === 'category') {
+    state.catView = validCategory(p.get('category')) || 'Dessert';
+  } else {
+    state.category = p.get('category') || 'all';
+  }
+}
+
+// The 10 category names, computed live from FOODS so the view always matches the data.
+var categoryList = null;
+function allCategories() {
+  if (!categoryList) categoryList = uniqueValues('category');
+  return categoryList;
+}
+
+function validCategory(v) {
+  if (!v || typeof FOODS === 'undefined') return null;
+  return allCategories().indexOf(v) !== -1 ? v : null;
 }
 
 function writeStateToURL() {
   var p = new URLSearchParams();
-  p.set('tab', state.tab);
-  if (state.sort !== 'score') p.set('sort', state.sort);
-  if (state.category !== 'all') p.set('category', state.category);
-  if (state.region !== 'all') p.set('region', state.region);
-  if (state.tier !== 'all') p.set('tier', state.tier);
-  if (state.q) p.set('q', state.q);
+  if (state.view === 'category') {
+    p.set('view', 'category');
+    p.set('category', state.catView);
+    if (state.sort !== 'score') p.set('sort', state.sort);
+    if (state.region !== 'all') p.set('region', state.region);
+    if (state.q) p.set('q', state.q);
+  } else {
+    p.set('tab', state.tab);
+    if (state.sort !== 'score') p.set('sort', state.sort);
+    if (state.category !== 'all') p.set('category', state.category);
+    if (state.region !== 'all') p.set('region', state.region);
+    if (state.tier !== 'all') p.set('tier', state.tier);
+    if (state.q) p.set('q', state.q);
+  }
   history.replaceState(null, '', window.location.pathname + '?' + p.toString());
 }
 
@@ -176,6 +202,101 @@ function tiersPresent(list) {
   return order.filter(function (t) { return seen[t]; });
 }
 
+/* ---------------- render: category view ---------------- */
+
+function catRowFood(food, badgeTab) {
+  var rank = badgeTab === 'worst' ? food.worstRank : food.bestRank;
+  var score = scoreOf(food, badgeTab);
+  return {
+    name: food.name, origin: food.origin, region: food.region, category: food.category,
+    emoji: food.emoji, definition: food.definition, research: food.research,
+    rank: rank, score: score, tier: tierOf(score), stars: starsOf(score), badgeTab: badgeTab
+  };
+}
+
+// Ranked dishes in one category, ordered by true global rank:
+// best-ranked ascending first, then worst-ranked ascending.
+function categoryRankedFoods(cat) {
+  var best = [], worst = [];
+  for (var i = 0; i < FOODS.length; i++) {
+    var f = FOODS[i];
+    if (f.category !== cat) continue;
+    if (f.bestRank !== null && f.bestRank !== undefined) best.push(catRowFood(f, 'best'));
+    else if (f.worstRank !== null && f.worstRank !== undefined) worst.push(catRowFood(f, 'worst'));
+  }
+  best.sort(function (a, b) { return a.rank - b.rank; });
+  worst.sort(function (a, b) { return a.rank - b.rank; });
+  return best.concat(worst);
+}
+
+function categoryUnrankedFoods(cat) {
+  var out = [];
+  for (var i = 0; i < FOODS.length; i++) {
+    var f = FOODS[i];
+    if (f.category !== cat) continue;
+    if ((f.bestRank === null || f.bestRank === undefined) &&
+        (f.worstRank === null || f.worstRank === undefined)) out.push(f);
+  }
+  return out;
+}
+
+// Region + search filters apply to both category-view sections; tier does not.
+function catViewFilter(list) {
+  var q = state.q.trim().toLowerCase();
+  return list.filter(function (f) {
+    if (state.region !== 'all' && f.region !== state.region) return false;
+    if (q) {
+      var hay = (f.name + ' ' + f.origin + ' ' + f.category + ' ' + f.region).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function unrankedCardHTML(f) {
+  var html = '<article class="unranked-card">';
+  html += '<div class="unranked-emoji" aria-hidden="true">' + esc(f.emoji) + '</div>';
+  html += '<h3>' + esc(f.name) + '</h3>';
+  html += '<p class="unranked-sub">' + esc(f.origin) + ' · ' + esc(f.region) + '</p>';
+  html += '<span class="unranked-tag">Unranked</span>';
+  if (f.definition) html += '<p class="unranked-def">' + esc(f.definition) + '</p>';
+  html += '</article>';
+  return html;
+}
+
+function renderCategoryView() {
+  var cat = state.catView;
+  var ranked = catViewFilter(categoryRankedFoods(cat));
+  var unranked = catViewFilter(categoryUnrankedFoods(cat));
+  // Unranked dishes are never scored: sort only by name/region here.
+  var shown = state.sort === 'score' ? unranked : applySort(unranked);
+
+  $('resultCount').textContent = ranked.length + ' ranked · ' + unranked.length +
+    ' more dishes in ' + cat;
+
+  var board = $('leaderboard');
+  var html = '<h2 class="cat-section-title">Top Ranked in ' + esc(cat) + '</h2>' +
+    '<p class="rank-note">Ranks shown are each dish\'s true global rank — not re-numbered per category.</p>';
+  var filtersActive = state.region !== 'all' || state.q.trim() !== '';
+  if (ranked.length === 0) {
+    html += '<div class="empty">' + (filtersActive
+      ? 'No ranked ' + esc(cat) + ' dishes match your filters.'
+      : 'No ranked dishes in this category yet — explore the full collection below.') + '</div>';
+  } else {
+    html += ranked.map(rowHTML).join('');
+  }
+  board.innerHTML = html;
+
+  var wrap = $('unrankedWrap');
+  if (shown.length === 0) {
+    wrap.hidden = true;
+  } else {
+    wrap.hidden = false;
+    $('unrankedTitle').textContent = 'More ' + cat + ' dishes';
+    $('unrankedGrid').innerHTML = shown.map(unrankedCardHTML).join('');
+  }
+}
+
 /* ---------------- render: leaderboard ---------------- */
 
 function photoFor(name) {
@@ -207,8 +328,13 @@ function voteHTML(name) {
 function rowHTML(f) {
   var pc = prosConsFor(f.name);
   var photo = photoFor(f.name);
-  var badgeCls = state.tab === 'worst' ? 'rank-badge worst' : 'rank-badge best';
-  var badgeTxt = '#' + f.rank + (state.tab === 'worst' ? ' Worst' : ' Best');
+  // Category view rows carry badgeTab ('best'|'worst') and show the dish's
+  // TRUE global badge; ranked tabs keep their original "#N Best"/"#N Worst" text.
+  var btab = f.badgeTab || state.tab;
+  var badgeCls = btab === 'worst' ? 'rank-badge worst' : 'rank-badge best';
+  var badgeTxt = f.badgeTab
+    ? (btab === 'worst' ? '#' + f.rank + ' Worst in the World' : '★ #' + f.rank + ' Best in the World')
+    : ('#' + f.rank + (state.tab === 'worst' ? ' Worst' : ' Best'));
 
   var html = '<article class="leader-row" data-name="' + esc(f.name) + '">';
   html += '<div class="leader-rank">#' + f.rank + '</div>';
@@ -247,18 +373,41 @@ function rowHTML(f) {
 }
 
 function render() {
-  var all = rankedFoods(state.tab);
-  var filtered = applySort(applyFilters(all));
-
   // tabs
-  $('tabBest').classList.toggle('active', state.tab === 'best');
-  $('tabWorst').classList.toggle('active', state.tab === 'worst');
-  $('tabBest').setAttribute('aria-selected', state.tab === 'best' ? 'true' : 'false');
-  $('tabWorst').setAttribute('aria-selected', state.tab === 'worst' ? 'true' : 'false');
+  var rankedActive = state.view === 'ranked';
+  $('tabBest').classList.toggle('active', rankedActive && state.tab === 'best');
+  $('tabWorst').classList.toggle('active', rankedActive && state.tab === 'worst');
+  $('tabCategory').classList.toggle('active', state.view === 'category');
+  $('tabBest').setAttribute('aria-selected', rankedActive && state.tab === 'best' ? 'true' : 'false');
+  $('tabWorst').setAttribute('aria-selected', rankedActive && state.tab === 'worst' ? 'true' : 'false');
+  $('tabCategory').setAttribute('aria-selected', state.view === 'category' ? 'true' : 'false');
 
   // controls reflect state
   $('sortSelect').value = state.sort;
   if ($('rankSearch').value !== state.q) $('rankSearch').value = state.q;
+
+  // category view: own chip groups + sections; tier chips don't apply to it
+  var inCat = state.view === 'category';
+  $('catViewGroup').hidden = !inCat;
+  $('catFilterGroup').hidden = inCat;
+  $('tierGroup').hidden = inCat;
+  if (inCat) {
+    renderChips('catViewChips', allCategories(), state.catView, function (v) {
+      state.catView = v; writeStateToURL(); render();
+    });
+    renderChips('regionChips', uniqueValues('region'), state.region, function (v) {
+      state.region = v; writeStateToURL(); render();
+    });
+    renderCategoryView();
+    renderCompareBar();
+    writeStateToURL();
+    return;
+  }
+  $('unrankedWrap').hidden = true;
+
+  var all = rankedFoods(state.tab);
+  var filtered = applySort(applyFilters(all));
+
   renderChips('categoryChips', uniqueValues('category'), state.category, function (v) {
     state.category = v; writeStateToURL(); render();
   });
@@ -386,10 +535,23 @@ function closeCompare() {
 
 function bindEvents() {
   $('tabBest').addEventListener('click', function () {
-    if (state.tab !== 'best') { state.tab = 'best'; writeStateToURL(); render(); }
+    if (state.view !== 'ranked' || state.tab !== 'best') {
+      state.view = 'ranked'; state.tab = 'best'; writeStateToURL(); render();
+    }
   });
   $('tabWorst').addEventListener('click', function () {
-    if (state.tab !== 'worst') { state.tab = 'worst'; writeStateToURL(); render(); }
+    if (state.view !== 'ranked' || state.tab !== 'worst') {
+      state.view = 'ranked'; state.tab = 'worst'; writeStateToURL(); render();
+    }
+  });
+  $('tabCategory').addEventListener('click', function () {
+    if (state.view !== 'category') {
+      state.view = 'category';
+      // If the ranked view had a category filter on, carry it over as the viewed category.
+      var carry = validCategory(state.category);
+      if (carry) state.catView = carry;
+      writeStateToURL(); render();
+    }
   });
   $('sortSelect').addEventListener('change', function (e) {
     state.sort = e.target.value; writeStateToURL(); render();
