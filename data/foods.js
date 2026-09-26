@@ -13237,3 +13237,6 @@ const FOODS = [
   "worstRank": null
  }
 ];
+
+/* Expose on window: const/let at top level do not attach to window. */
+window.FOODS = FOODS;
