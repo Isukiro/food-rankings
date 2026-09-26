@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Rankings — Best &amp; Worst Dishes on Earth | The Global Food Encyclopedia</title>
+<meta name="description" content="The definitive ranking of the world's best and worst foods — from Lechona (#1) to the dishes at the bottom of the list. Filter by category, region and tier, rate dishes yourself, and compare them side by side.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Food Rankings — Best &amp; Worst Dishes on Earth">
+<meta property="og:description" content="The definitive ranking of the world's best and worst foods. Filter by category, region and tier, rate dishes yourself, and compare them side by side.">
+<meta property="og:url" content="https://globalfoodencyclopedia.example/rankings.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ItemList",
+      "name": "The World's Best Foods — Ranked",
+      "description": "The top 10 best dishes on Earth, drawn from TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings.",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Lechona", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Lechona.JPG/960px-Lechona.JPG"},
+        {"@type": "ListItem", "position": 2, "name": "Pizza Napoletana", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Pizza_Napoletana_in_Pompei%2C_Italy.jpg/960px-Pizza_Napoletana_in_Pompei%2C_Italy.jpg"},
+        {"@type": "ListItem", "position": 3, "name": "Picanha", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/GrilledPicanha.jpg/960px-GrilledPicanha.jpg"},
+        {"@type": "ListItem", "position": 4, "name": "Rechta", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Rechta_de_Blida.jpg/960px-Rechta_de_Blida.jpg"},
+        {"@type": "ListItem", "position": 5, "name": "Phanaeng Curry", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Phanaeng_beef_curry.jpg/960px-Phanaeng_beef_curry.jpg"},
+        {"@type": "ListItem", "position": 6, "name": "Asado"},
+        {"@type": "ListItem", "position": 7, "name": "Çökertme Kebabı"},
+        {"@type": "ListItem", "position": 8, "name": "Rawon"},
+        {"@type": "ListItem", "position": 9, "name": "Cağ Kebabı"},
+        {"@type": "ListItem", "position": 10, "name": "Tibs"}
+      ]
+    },
+    {
+      "@type": "Review",
+      "itemReviewed": {"@type": "ItemList", "name": "The World's Best Foods — Ranked"},
+      "author": {"@type": "Organization", "name": "The Global Food Encyclopedia"},
+      "reviewBody": "Lechona holds the crown: Colombia's whole roasted pig, stuffed with rice and peas until the skin turns to crackling, sits above every other dish on Earth."
+    },
+    {
+      "@type": "Review",
+      "itemReviewed": {"@type": "ItemList", "name": "The World's Best Foods — Ranked"},
+      "author": {"@type": "Organization", "name": "The Global Food Encyclopedia"},
+      "reviewBody": "Pizza Napoletana at #2 is the benchmark every pizza is judged against — the 1889 formula of leopard-spotted crust, San Marzano tomatoes and fior di latte."
+    },
+    {
+      "@type": "Review",
+      "itemReviewed": {"@type": "ItemList", "name": "The World's Best Foods — Ranked"},
+      "author": {"@type": "Organization", "name": "The Global Food Encyclopedia"},
+      "reviewBody": "The worst-foods board is led by dishes that divide the world — acquired tastes that most voters could not get behind."
+    }
+  ]
+}
+</script>
+
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html" class="current">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a>
+</nav>
+
+<header class="hero">
+  <p class="kicker">The Leaderboard</p>
+  <h1>Best &amp; <span class="gold">Worst</span> Foods on Earth</h1>
+  <p class="sub">Every ranked dish, scored out of 10 and graded into tiers — from Lechona at the very top to the dishes the world could not get behind. Filter, search, rate, and compare.</p>
+  <div class="tabs" role="tablist" aria-label="Ranking type">
+    <button type="button" class="tab" id="tabBest" role="tab" aria-selected="true">🏆 Best Foods</button>
+    <button type="button" class="tab" id="tabWorst" role="tab" aria-selected="false">🪦 Worst Foods</button>
+  </div>
+</header>
+
+<main>
+  <div class="rank-controls">
+    <input type="search" id="rankSearch" placeholder="Search dishes, origins, regions…" aria-label="Search dishes">
+    <label class="sort-label">Sort
+      <select id="sortSelect" aria-label="Sort dishes">
+        <option value="score">By score</option>
+        <option value="name">By name</option>
+        <option value="region">By region</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="chip-group">
+    <span class="chip-label">Category</span>
+    <div class="chips" id="categoryChips"></div>
+  </div>
+  <div class="chip-group">
+    <span class="chip-label">Region</span>
+    <div class="chips" id="regionChips"></div>
+  </div>
+  <div class="chip-group">
+    <span class="chip-label">Tier</span>
+    <div class="chips" id="tierChips"></div>
+  </div>
+
+  <p class="result-count" id="resultCount" aria-live="polite"></p>
+  <div id="leaderboard"></div>
+</main>
+
+<div class="compare-bar" id="compareBar" hidden>
+  <span id="compareNote" role="status"></span>
+  <span id="compareNames"></span>
+  <button type="button" class="gold-btn" id="compareOpen">Compare (<span id="compareCount">0</span>)</button>
+  <button type="button" class="chip" id="compareClear">Clear</button>
+</div>
+
+<div class="compare-modal" id="compareModal" hidden>
+  <div class="compare-dialog" role="dialog" aria-modal="true" aria-label="Dish comparison">
+    <h2>Side-by-side comparison</h2>
+    <p class="sub" style="margin:6px 0 0">Scores, tiers, pros, cons and your own ratings — head to head.</p>
+    <div id="compareBody"></div>
+    <p style="margin-top:18px"><button type="button" class="chip" id="compareClose">✕ Close</button></p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="data/pros-cons.js"></script>
+<script src="data/photos.js"></script>
+<script src="rankings.js"></script>
+</body>
+</html>
