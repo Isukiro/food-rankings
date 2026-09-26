@@ -21,18 +21,34 @@
 
 <nav class="site-nav" aria-label="Site navigation">
   <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="tops.html">Category Tops</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="tree.html">Food Trees</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="cookbook.html" class="current">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="shelf.html">My Shelf</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <div class="nav-group">
+    <button type="button" class="nav-group-btn" aria-haspopup="true" aria-expanded="false">Explore <span class="nav-caret" aria-hidden="true">▾</span></button>
+    <div class="nav-menu" role="menu" aria-label="Explore">
+      <a href="rankings.html" role="menuitem">Rankings</a>
+      <a href="tops.html" role="menuitem">Category Tops</a>
+      <a href="categories.html" role="menuitem">Categories</a>
+      <a href="map.html" role="menuitem">Flavor Map</a>
+      <a href="tree.html" role="menuitem">Food Trees</a>
+    </div>
+  </div><span class="nav-divider" aria-hidden="true">◆</span>
+  <div class="nav-group">
+    <button type="button" class="nav-group-btn current" aria-haspopup="true" aria-expanded="false">Community <span class="nav-caret" aria-hidden="true">▾</span></button>
+    <div class="nav-menu" role="menu" aria-label="Community">
+      <a href="community.html" role="menuitem">Community</a>
+      <a href="shelf.html" role="menuitem">My Shelf</a>
+      <a href="cookbook.html" role="menuitem" class="current">Cookbook</a>
+    </div>
+  </div><span class="nav-divider" aria-hidden="true">◆</span>
+  <div class="nav-group">
+    <button type="button" class="nav-group-btn" aria-haspopup="true" aria-expanded="false">Help <span class="nav-caret" aria-hidden="true">▾</span></button>
+    <div class="nav-menu" role="menu" aria-label="Help">
+      <a href="#" id="sage-nav-link" role="menuitem">🧑‍🍳 Ask Sage</a>
+      <a href="#" id="tour-nav-link" role="menuitem">Take the Tour</a>
+      <a href="about.html" role="menuitem">About</a>
+      <a href="contact.html" role="menuitem">Contact</a>
+    </div>
+  </div><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="settings.html">Settings</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="settings.html" class="account-chip">Sign in</a>
 </nav>
 
