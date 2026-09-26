@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community · Global Food Encyclopedia</title>
+<meta name="description" content="Join the public discussion about foods from every continent — powered by GitHub Discussions. Your star ratings stay personal and private, in your own browser.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Community · Global Food Encyclopedia">
+<meta property="og:description" content="Public discussion about foods from every continent. Comments via GitHub Discussions; star ratings stay personal and private.">
+<meta property="og:url" content="https://isukiro.github.io/food-rankings/community.html">
+<meta property="og:site_name" content="The Global Food Encyclopedia">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="modal.css">
+<style>
+/* ---- community.html page-specific styles (theme variables only; do not touch styles.css) ---- */
+.community-wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+.community-wrap h1 { color: var(--text); font-size: 2.2rem; margin: 0 0 12px; }
+.community-wrap h1 .gold { color: var(--accent); }
+.community-wrap .lead { color: var(--text-soft); font-size: 1.1rem; line-height: 1.7; }
+.community-wrap .lead a { color: var(--accent); }
+
+.setup-banner {
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin: 28px 0 32px;
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.12);
+}
+.setup-banner h2 { color: var(--accent); font-size: 1.15rem; margin: 0 0 8px; letter-spacing: 0.02em; }
+.setup-banner > p { color: var(--text-soft); margin: 0 0 14px; line-height: 1.6; }
+.setup-banner ol { margin: 0; padding-left: 22px; color: var(--text); line-height: 1.9; }
+.setup-banner ol li::marker { color: var(--accent); font-weight: bold; }
+.setup-banner code {
+  background: var(--bg); color: var(--accent);
+  padding: 2px 8px; border-radius: 6px; font-size: 0.9em;
+  border: 1px solid var(--primary);
+}
+.setup-banner .note { margin-top: 14px; font-size: 0.95rem; color: var(--muted); }
+
+.comments-shell {
+  background: var(--surface-2);
+  border: 1px solid var(--primary);
+  border-radius: 14px;
+  padding: 28px;
+  margin-top: 32px;
+}
+.comments-shell h2 { color: var(--text); margin: 0 0 8px; }
+.comments-shell p { color: var(--muted); margin: 0 0 4px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Site navigation">
+  <a href="index.html">Home</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="rankings.html">Rankings</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="categories.html">Categories</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="map.html">Flavor Map</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="community.html" class="current">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="cookbook.html">Cookbook</a>
+</nav>
+
+<main class="community-wrap">
+  <h1>The <span class="gold">Community</span> Table</h1>
+  <p class="lead">This is where visitors argue, agree, and swap food stories — out in the open.</p>
+
+  <!-- ============ SETUP CHECKLIST: comments go live only after the owner does these ============ -->
+  <section class="setup-banner" aria-label="Comment system setup checklist">
+    <h2>⚠ Comments aren't live yet — 3 steps for the site owner</h2>
+    <p>Comments on this page run on <strong>giscus</strong> (free, backed by GitHub Discussions, works on static hosting like GitHub Pages). Before visitors can comment, the owner must:</p>
+    <ol>
+      <li>Enable <strong>Discussions</strong> under the repo's <code>Settings → General</code> (Features section).</li>
+      <li>Install the <strong>giscus app</strong> on the <code>Isukiro/food-rankings</code> repo: <a href="https://github.com/apps/giscus">https://github.com/apps/giscus</a></li>
+      <li>Create a discussion category called <strong>"Comments"</strong> (under the Discussions tab → Categories), then hand the <strong>category ID</strong> to the assistant so the embed below can be finalized with real IDs.</li>
+    </ol>
+    <p class="note">Until those IDs are pasted into the embed block below, the comment box will show a placeholder configuration. Everything else on this page works normally.</p>
+  </section>
+
+  <p class="lead">Two things look similar on this site but do very different jobs: <strong>giscus comments</strong> are <em>public discussion</em> with other visitors — you'll need a free GitHub account to post, and everything you write is visible to everyone. The <strong>star ratings</strong> you see on rankings and food pages are the opposite: they are <em>your personal scores</em>, stored only in your own browser, never uploaded, never shared.</p>
+
+  <p class="lead">Debate the rankings, recommend hidden gems, or correct us — politely. Taste is personal, and the table is big enough for all of it.</p>
+
+  <section class="comments-shell" aria-label="Visitor comments">
+    <h2>💬 Join the discussion</h2>
+    <p>Sign in with GitHub to post. Be kind: no spam, no hate, no spoiling somebody's dinner.</p>
+
+    <!-- ================================================================
+         GISCUS EMBED BLOCK — COORDINATOR: find/replace the placeholders.
+         Steps once the owner finishes the setup checklist above:
+           1. Visit https://giscus.app and enter repo "Isukiro/food-rankings".
+           2. Copy the repo ID it shows, and replace the
+              data-repo-id="SETUP-NEEDED: ..." value below.
+           3. Create a "Comments" discussion category (or any category),
+              copy its category ID, and replace the
+              data-category-id="SETUP-NEEDED: ..." value below.
+              (data-category should then name that same category.)
+         Attribute reference (giscus documented embed format):
+           data-repo, data-repo-id, data-category, data-category-id,
+           data-mapping, data-strict, data-reactions-enabled,
+           data-emit-metadata, data-input-position, data-theme, data-lang
+         ================================================================ -->
+    <script src="https://giscus.app/client.js"
+            data-repo="Isukiro/food-rankings"
+            data-repo-id="R_kgDOUsN95w"
+            data-category="SETUP-NEEDED: create a 'Comments' discussion category (repo Settings → Discussions must be enabled first)"
+            data-category-id="SETUP-NEEDED: paste category id"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="en"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <!-- ============ END GISCUS EMBED BLOCK ============ -->
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>The Global Food Encyclopedia — rankings draw on TasteAtlas global rankings, CNN reader polls, and UNESCO heritage listings. Taste is personal.</p>
+</footer>
+
+<script src="data/foods.js"></script>
+<script src="data/photos.js"></script>
+<script src="data/pros-cons.js"></script>
+<script src="modal.js"></script>
+<script src="recent.js"></script>
+<script src="tour.js"></script>
+<script src="theme.js"></script>
+<script src="cookbook.js"></script>
+<script src="fotd.js"></script>
+<script src="assistant.js"></script>
+<script src="cursor-glow.js"></script>
+</body>
+</html>
