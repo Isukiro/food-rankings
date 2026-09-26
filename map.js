@@ -397,15 +397,17 @@
     var origins = Object.keys(CENTROIDS).filter(function (o) { return dishesOf(o).length > 0; });
 
     var map = L.map("flavormap", { worldCopyJump: true, zoomControl: true }).setView([20, 10], 2);
-    /* Tile layer: CARTO's dark basemap (© OpenStreetMap contributors © CARTO).
+    /* Tile layer: Esri's dark-gray canvas basemap (no API key needed).
      * We deliberately do NOT use tile.openstreetmap.org directly — those are
      * volunteer-run servers with a strict usage policy, and they block
-     * embedded use like this. CARTO serves the same OSM data from its own
-     * infrastructure and permits it with attribution; the dark style also
-     * suits the site's navy theme. */
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      maxZoom: 18,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+     * embedded use like this. We previously used CARTO, but CARTO now
+     * requires an API key on its free tiles (they render "API KEY REQUIRED"
+     * placeholders without one). Esri serves these tiles keyless with
+     * attribution; the dark style also suits the site's navy theme.
+     * NOTE: Esri's URL order is {z}/{y}/{x} — y before x. */
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 16,
+      attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
     }).addTo(map);
 
     /* Nudge exact duplicate centroids apart (e.g. "USA" vs "United States",
