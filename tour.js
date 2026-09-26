@@ -302,6 +302,13 @@
     showStep(0);
   }
 
+  /* The tour's steps describe the homepage, so the overlay only ever runs
+   * there. On other pages the nav link just takes you home and starts it. */
+  function isHomePage() {
+    var p = String(location.pathname || '').replace(/\\/g, '/');
+    return /(^|\/)index\.html$/i.test(p) || /\/$/.test(p);
+  }
+
   function injectReplayLink() {
     if (document.getElementById(REPLAY_ID)) return; // guard against double-injection
     var nav = document.querySelector('nav.site-nav');
@@ -311,13 +318,17 @@
     divider.setAttribute('aria-hidden', 'true');
     divider.textContent = '◆';
     var link = document.createElement('a');
-    link.href = '#';
     link.id = REPLAY_ID;
     link.textContent = 'Take the tour';
-    link.addEventListener('click', function (e) {
-      e.preventDefault();
-      startFoodTour();
-    });
+    if (isHomePage()) {
+      link.href = '#';
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        startFoodTour();
+      });
+    } else {
+      link.href = 'index.html#tour';
+    }
     nav.appendChild(divider);
     nav.appendChild(link);
   }
@@ -325,7 +336,14 @@
   function init() {
     injectStyles();
     injectReplayLink();
-    if (!storageGet(STORE_KEY)) {
+    var viaLink = false;
+    try {
+      if (location.hash === '#tour') {
+        viaLink = true;
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    } catch (e) { /* file:// may reject replaceState; harmless */ }
+    if (isHomePage() && (!storageGet(STORE_KEY) || viaLink)) {
       setTimeout(function () { startFoodTour(); }, 600);
     }
   }
