@@ -410,6 +410,33 @@
       attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
     }).addTo(map);
 
+    /* "You are here" marker: regions.js calls window.__frMap.youAreHere(lat, lng, label)
+     * when a visitor explores a region — a pulsing gold pin at the region's center.
+     * Only one at a time; removed when another region is chosen or the panel closes.
+     * Guarded throughout so the map still works if Leaflet hiccups. */
+    var youAreHereMarker = null;
+    map.clearYouAreHere = function () {
+      try {
+        if (youAreHereMarker) { map.removeLayer(youAreHereMarker); youAreHereMarker = null; }
+      } catch (e) { /* noop */ }
+    };
+    map.youAreHere = function (lat, lng, label) {
+      try {
+        if (typeof L === "undefined" || typeof L.divIcon !== "function") return;
+        map.clearYouAreHere();
+        var icon = L.divIcon({
+          className: "yah-wrap",
+          html: '<div class="yah-pulse" aria-hidden="true"></div>'
+            + '<div class="yah-dot" aria-hidden="true"></div>'
+            + '<div class="yah-label">' + esc(label || "You are here") + '</div>',
+          iconSize: [0, 0]
+        });
+        youAreHereMarker = L.marker([lat, lng], {
+          icon: icon, interactive: false, keyboard: false, zIndexOffset: 1000
+        }).addTo(map);
+      } catch (e) { /* noop */ }
+    };
+
     /* Nudge exact duplicate centroids apart (e.g. "USA" vs "United States",
      * "Hawaii" vs "Hawaii, USA") so overlapping markers stay clickable. */
     var used = {};
