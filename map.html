@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="The Global Food Encyclopedia">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="modal.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<!-- Leaflet CSS is injected by the loader script below, from whichever CDN succeeds. -->
 <style>
 /* Flavor Map page styles (map.html only; theme variables come from styles.css). */
 .fm-wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; }
@@ -97,7 +97,8 @@
   <a href="community.html">Community</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="about.html">About</a><span class="nav-divider" aria-hidden="true">◆</span>
   <a href="contact.html">Contact</a><span class="nav-divider" aria-hidden="true">◆</span>
-  <a href="cookbook.html">Cookbook</a>
+  <a href="cookbook.html">Cookbook</a><span class="nav-divider" aria-hidden="true">◆</span>
+  <a href="#" id="sage-nav-link">🧑‍🍳 Ask Sage</a>
 </nav>
 
 <header class="hero">
@@ -135,8 +136,55 @@
 <script src="assistant.js"></script>
 <script src="cursor-glow.js"></script>
 <script src="recent.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="modal.js"></script>
-<script src="map.js"></script>
+<script>
+/* Leaflet loader: some networks and ad-blockers block unpkg, so try three
+ * CDNs in order (with a timeout race). modal.js + map.js boot after Leaflet
+ * is ready — or after every CDN fails, in which case map.js shows its
+ * friendly fallback message instead of a dead page. */
+(function () {
+  var CDNS = [
+    { js: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+      css: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' },
+    { js: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js',
+      css: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css' },
+    { js: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js',
+      css: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css' }
+  ];
+  function boot() {
+    var chain = ['modal.js', 'map.js'];
+    (function next() {
+      var f = chain.shift();
+      if (!f) return;
+      var s = document.createElement('script');
+      s.src = f;
+      s.onload = next;
+      s.onerror = next;
+      document.body.appendChild(s);
+    })();
+  }
+  function withLeaflet(i) {
+    if (typeof L === 'undefined' || document.getElementById('leaflet-css')) return;
+    var link = document.createElement('link');
+    link.id = 'leaflet-css';
+    link.rel = 'stylesheet';
+    link.href = CDNS[i].css;
+    document.head.appendChild(link);
+    boot();
+  }
+  (function load(i) {
+    if (typeof L !== 'undefined') { withLeaflet(0); return; }
+    if (i >= CDNS.length) { boot(); return; } // map.js shows its fallback
+    var done = false;
+    var timer = setTimeout(function () {
+      if (!done) { done = true; load(i + 1); }
+    }, 8000);
+    var s = document.createElement('script');
+    s.src = CDNS[i].js;
+    s.onload = function () { if (!done) { done = true; clearTimeout(timer); withLeaflet(i); } };
+    s.onerror = function () { if (!done) { done = true; clearTimeout(timer); load(i + 1); } };
+    document.head.appendChild(s);
+  })(0);
+})();
+</script>
 </body>
 </html>
